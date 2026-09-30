@@ -3,372 +3,373 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản Lý Tài Chính Cá Nhân & Kinh Doanh</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
+    <title>Sổ Quản Lý Tài Chính & Đầu Tư</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; }
+        :root {
+            --bg-color: #0f172a;
+            --panel-bg: rgba(30, 41, 59, 0.7);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #10b981;
+            --danger: #ef4444;
+            --border: rgba(255, 255, 255, 0.1);
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0; padding: 20px;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+        .tab-btn {
+            background: transparent; border: none; color: var(--text-muted); 
+            font-size: 16px; font-weight: bold; cursor: pointer; padding: 10px 20px;
+            border-radius: 8px; transition: 0.3s;
+        }
+        .tab-btn.active { background: var(--panel-bg); color: var(--text-main); border: 1px solid var(--border); }
+        .panel { 
+            background: var(--panel-bg); border-radius: 12px; padding: 20px; 
+            border: 1px solid var(--border); margin-bottom: 20px; backdrop-filter: blur(10px);
+        }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+        .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+        .stat-box { padding: 15px; border-radius: 8px; background: rgba(0,0,0,0.2); border: 1px solid var(--border); }
+        .stat-box h3 { margin: 0 0 5px 0; font-size: 14px; color: var(--text-muted); }
+        .stat-box .val { font-size: 24px; font-weight: bold; }
+        .val.green { color: var(--accent); } .val.red { color: var(--danger); }
+        
+        input, select, button {
+            width: 100%; padding: 10px; margin-top: 5px; margin-bottom: 15px;
+            background: rgba(0,0,0,0.2); border: 1px solid var(--border);
+            color: white; border-radius: 6px; box-sizing: border-box;
+        }
+        button { background: var(--accent); cursor: pointer; font-weight: bold; border: none; }
+        button:hover { background: #059669; }
+        .btn-secondary { background: #3b82f6; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid var(--border); }
+        th { color: var(--text-muted); font-size: 14px; }
+        
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
     </style>
 </head>
-<body class="bg-slate-900 text-slate-100 min-h-screen pb-12">
+<body>
 
-    <!-- Auth / Key Check Screen -->
-    <div id="authScreen" class="fixed inset-0 bg-slate-950 flex items-center justify-center p-4 z-50">
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 w-full max-w-md shadow-2xl">
-            <div class="flex items-center justify-center w-12 h-12 bg-emerald-500/10 text-emerald-400 rounded-xl mb-4 mx-auto">
-                <i data-lucide="wallet"></i>
-            </div>
-            <h1 class="text-xl font-bold text-center text-white mb-2">Quản Lý Tài Chính</h1>
-            <p class="text-xs text-slate-400 text-center mb-6">Mã truy cập giúp đồng bộ và bảo mật dữ liệu Firebase của bạn.</p>
-            
-            <form id="authForm" onsubmit="handleAuth(event)" class="space-y-4">
-                <div>
-                    <label class="block text-xs font-medium text-slate-400 mb-1">Mã truy cập (Access Key)</label>
-                    <input type="password" id="accessKeyInput" placeholder="Nhập mã truy cập..." required
-                        class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-emerald-500 text-white placeholder-slate-500">
-                </div>
-                <button type="submit" class="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-semibold py-2.5 rounded-xl transition duration-200 text-sm flex items-center justify-center gap-2">
-                    <i data-lucide="log-in" class="w-4 h-4"></i> Truy Cập Hệ Thống
-                </button>
-            </form>
-        </div>
+<div class="container">
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('chi-tieu')">1. Giao Dịch & Chi Tiêu</button>
+        <button class="tab-btn" onclick="switchTab('dau-tu')">2. Quản Lý Đầu Tư</button>
+        <button class="tab-btn" onclick="switchTab('cai-dat')">3. Cài Đặt Hệ Thống</button>
     </div>
 
-    <!-- Main Application UI -->
-    <div id="mainApp" class="hidden max-w-4xl mx-auto px-4 pt-6">
-        <!-- Top Bar -->
-        <header class="flex items-center justify-between pb-6 border-b border-slate-800 mb-6">
-            <div class="flex items-center gap-3">
-                <div class="p-2.5 bg-emerald-500/10 text-emerald-400 rounded-xl border border-emerald-500/20">
-                    <i data-lucide="coins" class="w-6 h-6"></i>
-                </div>
-                <div>
-                    <h1 class="text-lg font-bold text-white">Sổ Thu Chi Firebase</h1>
-                    <p class="text-xs text-slate-400">Đồng bộ dữ liệu thời gian thực</p>
-                </div>
+    <!-- TAB 1: CHI TIÊU & THU NHẬP -->
+    <div id="chi-tieu" class="tab-content active">
+        <div class="grid-3">
+            <div class="stat-box">
+                <h3>Hạn Mức Chi Tiêu Còn Lại (Quỹ)</h3>
+                <div class="val green" id="val-spending-fund">0 đ</div>
             </div>
-            <button onclick="logout()" class="p-2 text-slate-400 hover:text-rose-400 hover:bg-slate-800 rounded-lg transition" title="Đăng xuất">
-                <i data-lucide="log-out" class="w-5 h-5"></i>
-            </button>
-        </header>
-
-        <!-- Balance Overview Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <!-- Balance Card -->
-            <div class="bg-slate-800/80 border border-slate-700/60 rounded-2xl p-4 relative overflow-hidden">
-                <div class="flex justify-between items-start mb-2">
-                    <span class="text-xs font-medium text-slate-400">Số Dư Hiện Tại</span>
-                    <i data-lucide="scale" class="w-4 h-4 text-emerald-400"></i>
-                </div>
-                <div id="totalBalance" class="text-2xl font-bold text-white mb-1">0 ₫</div>
-                <p class="text-[11px] text-slate-400">Thu nhập ròng khả dụng</p>
+            <div class="stat-box">
+                <h3>Quỹ Dự Phòng</h3>
+                <div class="val" id="val-emergency-fund">0 đ</div>
             </div>
-
-            <!-- Income Card -->
-            <div class="bg-slate-800/80 border border-slate-700/60 rounded-2xl p-4">
-                <div class="flex justify-between items-start mb-2">
-                    <span class="text-xs font-medium text-emerald-400">Tổng Thu</span>
-                    <i data-lucide="arrow-down-left" class="w-4 h-4 text-emerald-400"></i>
-                </div>
-                <div id="totalIncome" class="text-xl font-bold text-emerald-400 mb-1">+0 ₫</div>
-                <p class="text-[11px] text-slate-400">Các khoản tiền vào</p>
-            </div>
-
-            <!-- Expense Card -->
-            <div class="bg-slate-800/80 border border-slate-700/60 rounded-2xl p-4">
-                <div class="flex justify-between items-start mb-2">
-                    <span class="text-xs font-medium text-rose-400">Tổng Chi</span>
-                    <i data-lucide="arrow-up-right" class="w-4 h-4 text-rose-400"></i>
-                </div>
-                <div id="totalExpense" class="text-xl font-bold text-rose-400 mb-1">-0 ₫</div>
-                <p class="text-[11px] text-slate-400">Các khoản chi tiêu / đầu tư</p>
+            <div class="stat-box">
+                <h3>Quỹ Học Tập</h3>
+                <div class="val" id="val-education-fund">0 đ</div>
             </div>
         </div>
 
-        <!-- Add Transaction Form -->
-        <div class="bg-slate-800/50 border border-slate-800 rounded-2xl p-5 mb-8">
-            <h2 class="text-sm font-semibold text-white mb-4 flex items-center gap-2">
-                <i data-lucide="plus-circle" class="w-4 h-4 text-emerald-400"></i> Thêm Giao Dịch Mới
-            </h2>
-            
-            <form id="transactionForm" onsubmit="addTransaction(event)" class="space-y-4">
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
-                    <!-- Type -->
-                    <div>
-                        <label class="block text-xs text-slate-400 mb-1">Loại Giao Dịch</label>
-                        <select id="txType" required onchange="updateCategories()"
-                            class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500">
-                            <option value="expense">Khoản Chi (-)</option>
-                            <option value="income">Khoản Thu (+)</option>
-                        </select>
-                    </div>
-
-                    <!-- Amount -->
-                    <div>
-                        <label class="block text-xs text-slate-400 mb-1">Số Tiền (VNĐ)</label>
-                        <input type="number" id="txAmount" placeholder="0" min="1000" step="1000" required
-                            class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500">
-                    </div>
-
-                    <!-- Category -->
-                    <div>
-                        <label class="block text-xs text-slate-400 mb-1">Danh Mục</label>
-                        <select id="txCategory" required
-                            class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500">
-                            <!-- Populated dynamically -->
-                        </select>
-                    </div>
-
-                    <!-- Date -->
-                    <div>
-                        <label class="block text-xs text-slate-400 mb-1">Ngày Ghi Nhận</label>
-                        <input type="date" id="txDate" required
-                            class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500">
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <!-- Payment Method -->
-                    <div>
-                        <label class="block text-xs text-slate-400 mb-1">Phương Thức</label>
-                        <select id="txMethod" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500">
-                            <option value="Chuyển khoản">Chuyển khoản (CK)</option>
-                            <option value="Tiền mặt">Tiền mặt</option>
-                            <option value="Thẻ tín dụng">Thẻ tín dụng</option>
-                        </select>
-                    </div>
-
-                    <!-- Note -->
-                    <div class="sm:col-span-2">
-                        <label class="block text-xs text-slate-400 mb-1">Ghi Chú / Chi Tiết</label>
-                        <input type="text" id="txNote" placeholder="Ví dụ: Mua nguyên liệu quầy bar, Tiền xăng xe..." required
-                            class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500">
-                    </div>
-                </div>
-
-                <div class="flex justify-end pt-2">
-                    <button type="submit" class="bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-semibold px-5 py-2.5 rounded-xl transition text-sm flex items-center gap-2">
-                        <i data-lucide="check" class="w-4 h-4"></i> Lưu Giao Dịch
-                    </button>
-                </div>
-            </form>
-        </div>
-
-        <!-- Transactions List Section -->
-        <div class="bg-slate-800/40 border border-slate-800 rounded-2xl p-5">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
-                <h2 class="text-sm font-semibold text-white flex items-center gap-2">
-                    <i data-lucide="list-ordered" class="w-4 h-4 text-emerald-400"></i> Lịch Sử Giao Dịch
-                </h2>
-
-                <!-- Filters -->
-                <div class="flex items-center gap-2">
-                    <select id="filterType" onchange="renderTransactions()" class="bg-slate-900 border border-slate-700 text-xs rounded-lg px-2.5 py-1.5 text-slate-300">
-                        <option value="all">Tất cả loại</option>
-                        <option value="income">Chỉ khoản thu</option>
-                        <option value="expense">Chỉ khoản chi</option>
-                    </select>
-                    <input type="text" id="searchInput" onkeyup="renderTransactions()" placeholder="Tìm ghi chú..." 
-                        class="bg-slate-900 border border-slate-700 text-xs rounded-lg px-2.5 py-1.5 text-slate-300 focus:outline-none focus:border-emerald-500">
-                </div>
+        <div class="grid-2">
+            <!-- Nhập Thu Nhập Mới -->
+            <div class="panel">
+                <h3 style="margin-top:0; color: var(--accent);">+ Khởi Tạo Thu Nhập Mới</h3>
+                <p style="font-size: 13px; color: var(--text-muted);">Thu nhập sẽ tự động chia vào các quỹ theo Cài đặt.</p>
+                <label>Số tiền thu nhập (VNĐ)</label>
+                <input type="number" id="input-income" placeholder="VD: 20000000">
+                <button onclick="processIncome()">Phân Bổ Thu Nhập</button>
             </div>
 
-            <!-- List Container -->
-            <div id="transactionList" class="space-y-2 max-h-[500px] overflow-y-auto pr-1">
-                <!-- Transactions will be loaded here dynamically -->
+            <!-- Ghi Nhận Chi Tiêu -->
+            <div class="panel">
+                <h3 style="margin-top:0; color: var(--danger);">- Thêm Giao Dịch Chi Tiêu</h3>
+                <p style="font-size: 13px; color: var(--text-muted);">Trừ thẳng vào Hạn mức chi tiêu.</p>
+                <label>Số tiền chi (VNĐ)</label>
+                <input type="number" id="input-expense" placeholder="VD: 50000">
+                <label>Danh mục</label>
+                <select id="expense-category">
+                    <option>Ăn uống</option><option>Xăng xe</option><option>Mua sắm</option>
+                </select>
+                <button onclick="addExpense()" style="background: var(--danger);">Lưu Chi Tiêu</button>
             </div>
         </div>
     </div>
 
-    <!-- Firebase Modular SDK -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    <!-- TAB 2: ĐẦU TƯ -->
+    <div id="dau-tu" class="tab-content">
+        <div class="grid-3">
+            <div class="stat-box">
+                <h3>Cash Chờ Phân Bổ</h3>
+                <div class="val" id="val-invest-cash">0 đ</div>
+            </div>
+            <div class="stat-box">
+                <h3>Tổng Đã Đầu Tư (Giá vốn)</h3>
+                <div class="val" id="val-invest-total">0 đ</div>
+            </div>
+            <div class="stat-box">
+                <h3>Ước Tính PnL (Lãi/Lỗ)</h3>
+                <div class="val green" id="val-invest-pnl">0 đ</div>
+            </div>
+        </div>
 
-        // Configuration matching Firebase Realtime Database
-        const firebaseConfig = {
-            databaseURL: "https://auto-72a39-default-rtdb.asia-southeast1.firebasedatabase.app/"
-        };
+        <div class="grid-2">
+            <!-- Thực Hiện Lệnh Mua -->
+            <div class="panel">
+                <h3 style="margin-top:0;">Thực Hiện Lệnh Phân Bổ (Mua)</h3>
+                <label>Loại Tài Sản (Gợi ý phân bổ: Vàng 10%, ETF 40%...)</label>
+                <select id="invest-asset">
+                    <option value="Vàng">Vàng</option>
+                    <option value="ETF">Cổ phiếu ETF</option>
+                    <option value="CCQ">Chứng Chỉ Quỹ</option>
+                </select>
+                <label>Giá Mua Đơn Vị</label>
+                <input type="number" id="invest-price" placeholder="VD: 8000000">
+                <label>Số Lượng</label>
+                <input type="number" id="invest-qty" placeholder="VD: 1">
+                <button onclick="executeInvestment()">Xác Nhận Phân Bổ (Mua)</button>
+            </div>
+            
+            <!-- Biểu đồ -->
+            <div class="panel">
+                <canvas id="portfolioChart" height="200"></canvas>
+            </div>
+        </div>
 
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
+        <!-- Danh mục nắm giữ -->
+        <div class="panel">
+            <h3 style="margin-top:0;">Danh Mục Của Tôi</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tài Sản</th><th>Số Lượng</th><th>Giá Vốn TB</th><th>Giá Hiện Tại (Cập nhật)</th><th>Tổng Vốn</th><th>Lãi/Lỗ (PnL)</th>
+                    </tr>
+                </thead>
+                <tbody id="portfolio-table-body">
+                    <!-- Data rendered here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
 
-        let accessKey = '';
-        let transactions = [];
+    <!-- TAB 3: CÀI ĐẶT -->
+    <div id="cai-dat" class="tab-content">
+        <div class="panel" style="max-width: 600px; margin: 0 auto;">
+            <h3 style="margin-top:0;">Thiết Lập Chiến Lược Dòng Tiền</h3>
+            <label>Quỹ Chi Tiêu Cố Định mỗi tháng (VNĐ)</label>
+            <input type="number" id="set-fixed-spend" value="4000000">
+            
+            <label>Tỷ lệ Quỹ Dự Phòng (%)</label>
+            <input type="number" id="set-pct-emergency" value="10">
+            
+            <label>Tỷ lệ Quỹ Học Tập (%)</label>
+            <input type="number" id="set-pct-education" value="10">
+            
+            <p style="font-size: 13px; color: var(--accent);">* Phần còn lại sau khi trừ các khoản trên sẽ chuyển vào Cash Đầu Tư.</p>
+            <button onclick="saveSettings()">Lưu Cài Đặt</button>
+        </div>
+    </div>
+</div>
 
-        const categories = {
-            expense: ["Ăn uống", "Quầy Bar / Cửa hàng", "Xe cộ & Đi lại", "Trading / Đầu tư", "Sinh hoạt / Nhà cửa", "Giải trí", "Khác"],
-            income: ["Doanh thu bán hàng", "Thu nhập Trading", "Lương / Thưởng", "Thu nợ", "Khác"]
-        };
+<script>
+    // --- STATE MANAGEMENT ---
+    let state = {
+        settings: { fixedSpend: 4000000, pctEmergency: 10, pctEducation: 10 },
+        funds: { spending: 0, emergency: 0, education: 0, investCash: 0 },
+        portfolio: {
+            "Vàng": { qty: 0, totalCost: 0, currentPrice: 8000000 },
+            "ETF": { qty: 0, totalCost: 0, currentPrice: 20000 },
+            "CCQ": { qty: 0, totalCost: 0, currentPrice: 15000 }
+        }
+    };
 
-        // Make functions globally available
-        window.handleAuth = function(e) {
-            e.preventDefault();
-            const key = document.getElementById('accessKeyInput').value.trim();
-            if (key) {
-                accessKey = key;
-                localStorage.setItem('fin_access_key', key);
-                initApp();
+    // --- TAB SWITCH LOGIC ---
+    function switchTab(tabId) {
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+        event.target.classList.add('active');
+        if(tabId === 'dau-tu') updatePortfolioUI();
+    }
+
+    // --- CORE LOGIC: PROCESS INCOME ---
+    function processIncome() {
+        let income = parseFloat(document.getElementById('input-income').value);
+        if (!income || income <= 0) return alert("Vui lòng nhập số tiền hợp lệ.");
+
+        let remaining = income;
+
+        // 1. Cấp quỹ chi tiêu cố định
+        let toSpend = Math.min(state.settings.fixedSpend, remaining);
+        state.funds.spending += toSpend;
+        remaining -= toSpend;
+
+        // 2. Chia % cho Dự phòng và Học tập (Tính trên TỔNG thu nhập ban đầu, hoặc trên phần còn lại tùy chiến lược. Ở đây tính trên Tổng thu nhập như chuẩn mực)
+        let toEmergency = (income * state.settings.pctEmergency) / 100;
+        let toEducation = (income * state.settings.pctEducation) / 100;
+        
+        state.funds.emergency += toEmergency;
+        remaining -= toEmergency;
+        state.funds.education += toEducation;
+        remaining -= toEducation;
+
+        // Tư duy phản biện: Kiểm tra nếu bị âm dòng tiền
+        if (remaining < 0) {
+            alert("Cảnh báo: Thu nhập không đủ bù đắp các quỹ định mức! Hệ thống tạm thời đưa Cash Đầu tư về âm.");
+        }
+        
+        // 3. Phần dư đưa vào Cash Đầu Tư
+        state.funds.investCash += remaining;
+
+        document.getElementById('input-income').value = '';
+        updateDashboardUI();
+        alert("Đã phân bổ thu nhập thành công!");
+    }
+
+    // --- CORE LOGIC: ADD EXPENSE ---
+    function addExpense() {
+        let amount = parseFloat(document.getElementById('input-expense').value);
+        if (!amount || amount <= 0) return;
+
+        if (state.funds.spending < amount) {
+            let warn = confirm("Quỹ chi tiêu của bạn không đủ! Tiếp tục ghi nhận (sẽ bị âm quỹ)?");
+            if (!warn) return;
+        }
+
+        state.funds.spending -= amount;
+        document.getElementById('input-expense').value = '';
+        updateDashboardUI();
+    }
+
+    // --- CORE LOGIC: EXECUTE INVESTMENT ---
+    function executeInvestment() {
+        let asset = document.getElementById('invest-asset').value;
+        let price = parseFloat(document.getElementById('invest-price').value);
+        let qty = parseFloat(document.getElementById('invest-qty').value);
+        
+        if(!price || !qty) return alert("Nhập đủ giá và số lượng");
+        
+        let totalVal = price * qty;
+        if (state.funds.investCash < totalVal) {
+            return alert("Cash Chờ Phân Bổ không đủ để mua lệnh này!");
+        }
+
+        // Trừ cash, cộng tài sản
+        state.funds.investCash -= totalVal;
+        
+        state.portfolio[asset].qty += qty;
+        state.portfolio[asset].totalCost += totalVal;
+        state.portfolio[asset].currentPrice = price; // Cập nhật giá hiện tại thành giá mua gần nhất
+
+        document.getElementById('invest-price').value = '';
+        document.getElementById('invest-qty').value = '';
+        
+        updateDashboardUI();
+        updatePortfolioUI();
+    }
+
+    // --- CORE LOGIC: UPDATE MARKET PRICE MANUALLY ---
+    function updateMarketPrice(asset, inputElement) {
+        let newPrice = parseFloat(inputElement.value);
+        if(newPrice > 0) {
+            state.portfolio[asset].currentPrice = newPrice;
+            updatePortfolioUI();
+        }
+    }
+
+    // --- UI UPDATES ---
+    function formatMoney(num) {
+        return num.toLocaleString('vi-VN') + " đ";
+    }
+
+    function updateDashboardUI() {
+        document.getElementById('val-spending-fund').innerText = formatMoney(state.funds.spending);
+        document.getElementById('val-emergency-fund').innerText = formatMoney(state.funds.emergency);
+        document.getElementById('val-education-fund').innerText = formatMoney(state.funds.education);
+        document.getElementById('val-invest-cash').innerText = formatMoney(state.funds.investCash);
+    }
+
+    let myChart = null;
+    function updatePortfolioUI() {
+        let tbody = document.getElementById('portfolio-table-body');
+        tbody.innerHTML = '';
+        let totalInvested = 0;
+        let totalCurrentVal = 0;
+        
+        let chartLabels = [];
+        let chartData = [];
+
+        for (let asset in state.portfolio) {
+            let data = state.portfolio[asset];
+            if (data.qty > 0) {
+                let avgPrice = data.totalCost / data.qty;
+                let currentVal = data.qty * data.currentPrice;
+                let pnl = currentVal - data.totalCost;
+                
+                totalInvested += data.totalCost;
+                totalCurrentVal += currentVal;
+
+                chartLabels.push(asset);
+                chartData.push(currentVal);
+
+                let tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><b>${asset}</b></td>
+                    <td>${data.qty}</td>
+                    <td>${formatMoney(avgPrice)}</td>
+                    <td><input type="number" style="width:120px; margin:0;" value="${data.currentPrice}" onchange="updateMarketPrice('${asset}', this)"></td>
+                    <td>${formatMoney(data.totalCost)}</td>
+                    <td class="${pnl >= 0 ? 'val green' : 'val red'}" style="font-size:16px;">${pnl >= 0 ? '+' : ''}${formatMoney(pnl)}</td>
+                `;
+                tbody.appendChild(tr);
             }
-        };
-
-        window.logout = function() {
-            localStorage.removeItem('fin_access_key');
-            location.reload();
-        };
-
-        window.updateCategories = function() {
-            const type = document.getElementById('txType').value;
-            const categorySelect = document.getElementById('txCategory');
-            categorySelect.innerHTML = categories[type].map(c => `<option value="${c}">${c}</option>`).join('');
-        };
-
-        function initApp() {
-            document.getElementById('authScreen').classList.add('hidden');
-            document.getElementById('mainApp').classList.remove('hidden');
-            document.getElementById('txDate').value = new Date().toISOString().split('T')[0];
-            window.updateCategories();
-
-            // Listen to Realtime Database changes under node based on accessKey
-            const txRef = ref(db, `finance_records/${accessKey}`);
-            onValue(txRef, (snapshot) => {
-                const data = snapshot.val();
-                transactions = [];
-                if (data) {
-                    Object.keys(data).forEach(id => {
-                        transactions.push({ id, ...data[id] });
-                    });
-                    transactions.sort((a, b) => new Date(b.date) - new Date(a.date));
-                }
-                updateSummary();
-                renderTransactions();
-            });
         }
 
-        window.addTransaction = function(e) {
-            e.preventDefault();
-            const type = document.getElementById('txType').value;
-            const amount = parseFloat(document.getElementById('txAmount').value);
-            const category = document.getElementById('txCategory').value;
-            const date = document.getElementById('txDate').value;
-            const method = document.getElementById('txMethod').value;
-            const note = document.getElementById('txNote').value.trim();
+        let totalPnL = totalCurrentVal - totalInvested;
+        document.getElementById('val-invest-total').innerText = formatMoney(totalInvested);
+        let pnlEl = document.getElementById('val-invest-pnl');
+        pnlEl.innerText = (totalPnL >= 0 ? '+' : '') + formatMoney(totalPnL);
+        pnlEl.className = totalPnL >= 0 ? 'val green' : 'val red';
 
-            if (!amount || amount <= 0) return;
+        // Render Chart
+        let ctx = document.getElementById('portfolioChart').getContext('2d');
+        if (myChart) myChart.destroy();
+        myChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: chartLabels.length ? chartLabels : ['Chưa có tài sản'],
+                datasets: [{
+                    data: chartData.length ? chartData : [1],
+                    backgroundColor: ['#f59e0b', '#3b82f6', '#10b981', '#64748b'],
+                    borderWidth: 0
+                }]
+            },
+            options: { plugins: { legend: { position: 'right', labels: { color: '#f8fafc' } } } }
+        });
+    }
 
-            const newTx = {
-                type,
-                amount,
-                category,
-                date,
-                method,
-                note,
-                createdAt: Date.now()
-            };
+    function saveSettings() {
+        state.settings.fixedSpend = parseFloat(document.getElementById('set-fixed-spend').value);
+        state.settings.pctEmergency = parseFloat(document.getElementById('set-pct-emergency').value);
+        state.settings.pctEducation = parseFloat(document.getElementById('set-pct-education').value);
+        alert("Đã cập nhật chiến lược phân bổ!");
+    }
 
-            const txRef = ref(db, `finance_records/${accessKey}`);
-            push(txRef, newTx).then(() => {
-                document.getElementById('txAmount').value = '';
-                document.getElementById('txNote').value = '';
-            }).catch(err => alert("Lỗi khi kết nối Firebase: " + err.message));
-        };
+    // Init
+    updateDashboardUI();
+</script>
 
-        window.deleteTransaction = function(id) {
-            if (confirm("Bạn có chắc chắn muốn xóa giao dịch này không?")) {
-                const itemRef = ref(db, `finance_records/${accessKey}/${id}`);
-                remove(itemRef);
-            }
-        };
-
-        function updateSummary() {
-            let income = 0;
-            let expense = 0;
-
-            transactions.forEach(t => {
-                if (t.type === 'income') income += t.amount;
-                if (t.type === 'expense') expense += t.amount;
-            });
-
-            const balance = income - expense;
-
-            document.getElementById('totalBalance').innerText = formatCurrency(balance);
-            document.getElementById('totalIncome').innerText = '+' + formatCurrency(income);
-            document.getElementById('totalExpense').innerText = '-' + formatCurrency(expense);
-        }
-
-        window.renderTransactions = function() {
-            const listEl = document.getElementById('transactionList');
-            const filterType = document.getElementById('filterType').value;
-            const search = document.getElementById('searchInput').value.toLowerCase().trim();
-
-            const filtered = transactions.filter(t => {
-                const matchType = filterType === 'all' || t.type === filterType;
-                const matchSearch = t.note.toLowerCase().includes(search) || t.category.toLowerCase().includes(search);
-                return matchType && matchSearch;
-            });
-
-            if (filtered.length === 0) {
-                listEl.innerHTML = `
-                    <div class="text-center py-8 text-slate-500 text-xs">
-                        Chưa có giao dịch nào được ghi nhận.
-                    </div>`;
-                return;
-            }
-
-            listEl.innerHTML = filtered.map(t => `
-                <div class="flex items-center justify-between p-3 bg-slate-900/60 border border-slate-800 rounded-xl hover:border-slate-700 transition">
-                    <div class="flex items-center gap-3">
-                        <div class="p-2 rounded-lg ${t.type === 'income' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}">
-                            <i data-lucide="${t.type === 'income' ? 'arrow-down-left' : 'arrow-up-right'}" class="w-4 h-4"></i>
-                        </div>
-                        <div>
-                            <div class="text-sm font-medium text-white">${escapeHtml(t.note)}</div>
-                            <div class="flex items-center gap-2 text-[11px] text-slate-400 mt-0.5">
-                                <span class="bg-slate-800 px-1.5 py-0.5 rounded text-slate-300">${t.category}</span>
-                                <span>•</span>
-                                <span>${t.method}</span>
-                                <span>•</span>
-                                <span>${t.date}</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-3">
-                        <div class="text-right">
-                            <div class="text-sm font-bold ${t.type === 'income' ? 'text-emerald-400' : 'text-rose-400'}">
-                                ${t.type === 'income' ? '+' : '-'}${formatCurrency(t.amount)}
-                            </div>
-                        </div>
-                        <button onclick="deleteTransaction('${t.id}')" class="text-slate-500 hover:text-rose-400 p-1 transition" title="Xóa">
-                            <i data-lucide="trash-2" class="w-4 h-4"></i>
-                        </button>
-                    </div>
-                </div>
-            `).join('');
-
-            lucide.createIcons();
-        }
-
-        function formatCurrency(amount) {
-            return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
-        }
-
-        function escapeHtml(str) {
-            return str.replace(/[&<>"']/g, function(m) {
-                return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
-            });
-        }
-
-        // Auto login if key stored
-        const savedKey = localStorage.getItem('fin_access_key');
-        if (savedKey) {
-            accessKey = savedKey;
-            initApp();
-        }
-
-        lucide.createIcons();
-    </script>
 </body>
 </html>
