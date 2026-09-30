@@ -3,699 +3,372 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SANG AUTO PRO - PREMIUM CRM</title>
-    <link rel="apple-touch-icon" href="https://i.ibb.co/Z6f1Nb9H/image.png">
-
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/browser-image-compression/2.0.2/browser-image-compression.min.js"></script>
-
+    <title>Quản Lý Tài Chính Cá Nhân & Kinh Doanh</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        /* --- GIAO DIỆN SÁNG VÀ NHIỀU MÀU SẮC --- */
-        :root {
-            --primary: #2563eb;
-            --accent: #0ea5e9;
-            --accent-gradient: linear-gradient(135deg, #0ea5e9, #3b82f6);
-            --gold-gradient: linear-gradient(135deg, #fbbf24, #f59e0b);
-            --green-gradient: linear-gradient(135deg, #34d399, #10b981);
-            --purple-gradient: linear-gradient(135deg, #c084fc, #9333ea);
-            --bg: #f0f4f8; 
-            --card: #ffffff; 
-            --border: #e2e8f0;
-            --text-main: #1e293b; 
-            --text-dim: #64748b; 
-            --danger: #ef4444;
-            --warning: #f59e0b;
-            --success: #10b981;
-        }
-
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { 
-            background-color: var(--bg); color: var(--text-main); 
-            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
-            margin: 0; padding-bottom: 90px;
-        }
-
-        #login-screen {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(240, 244, 248, 0.85); backdrop-filter: blur(15px);
-            display: flex; align-items: center; justify-content: center;
-            z-index: 9999; transition: opacity 0.4s ease;
-        }
-        .login-box {
-            background: var(--card); padding: 40px 30px; border-radius: 24px;
-            border: 1px solid var(--border); width: 90%; max-width: 360px;
-            text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.08);
-            animation: fadeIn 0.5s ease;
-        }
-        .login-box h2 { margin: 0 0 10px 0; background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: 2px; font-weight: 900; }
-        .login-box p { color: var(--text-dim); font-size: 13px; margin-bottom: 25px; font-weight: 600; }
-        .login-box input { text-align: center; font-size: 18px; letter-spacing: 5px; font-weight: bold; background: #f8fafc; color: var(--text-main); border: 2px solid var(--border);}
-        .login-box input:focus { border-color: var(--primary); }
-
-        #app-content { display: none; }
-
-        .header {
-            background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(12px);
-            padding: 20px; text-align: center; border-bottom: 1px solid var(--border);
-            position: sticky; top: 0; z-index: 100; box-shadow: 0 4px 15px rgba(0,0,0,0.03);
-        }
-        .header h1 { font-size: 19px; letter-spacing: 5px; font-weight: 900; margin: 0; background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .header span { color: var(--text-dim); font-size: 10px; display: block; letter-spacing: 2px; text-transform: uppercase; margin-top: 4px; font-weight: 700;}
-
-        .container { max-width: 600px; margin: auto; padding: 15px; }
-
-        .tab-content { display: none; animation: fadeIn 0.4s ease; }
-        .tab-content.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        .section-title { font-size: 12px; font-weight: 800; color: var(--primary); text-transform: uppercase; margin: 25px 0 10px 5px; letter-spacing: 1px; display: flex; align-items: center; gap: 8px;}
-        .section-title::before { content: ""; display: block; width: 4px; height: 14px; background: var(--primary); border-radius: 4px; }
-        
-        .card { 
-            background: var(--card); 
-            border: 1px solid var(--border); border-radius: 18px; padding: 20px; margin-bottom: 15px; 
-            position: relative; transition: all 0.3s ease; box-shadow: 0 4px 10px rgba(0,0,0,0.03);
-        }
-        
-        label { display: block; font-size: 11px; color: var(--text-dim); margin-bottom: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;}
-        input, textarea, select {
-            width: 100%; background: #f8fafc; border: 1px solid var(--border);
-            color: var(--text-main); padding: 15px; border-radius: 12px; font-size: 14px; margin-bottom: 18px;
-            transition: all 0.3s; font-weight: 500;
-        }
-        input::placeholder, textarea::placeholder { color: #94a3b8; }
-        input:focus, textarea:focus, select:focus { border-color: var(--accent); outline: none; box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15); background: #ffffff;}
-        
-        .search-bar { background: #ffffff; border-radius: 20px; padding: 14px 20px; border: 1px solid var(--border); margin-bottom: 20px; font-size: 14px; width: 100%; color: var(--text-main); box-shadow: 0 2px 8px rgba(0,0,0,0.02);}
-
-        .image-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 15px; }
-        .image-item { aspect-ratio: 1/1; border-radius: 10px; overflow: hidden; background: #e2e8f0; border: 1px solid var(--border); position: relative; }
-        .image-item img { width: 100%; height: 100%; object-fit: cover; }
-
-        .btn { 
-            width: 100%; padding: 14px; border: none; border-radius: 12px; 
-            font-weight: 800; font-size: 12px; cursor: pointer; text-transform: uppercase; 
-            transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 5px; letter-spacing: 0.5px;
-        }
-        .btn:active { transform: scale(0.96); }
-        .btn-main { background: var(--accent-gradient); color: #fff; font-size: 14px; padding: 16px; box-shadow: 0 4px 15px rgba(14, 165, 233, 0.3); }
-        .btn-check { background: #f0f9ff; color: #0284c7; border: 1px solid #bae6fd; }
-        .btn-success { background: var(--green-gradient); color: #fff; border: none; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.2); }
-        .btn-danger { background: #fef2f2; color: var(--danger); border: 1px solid #fecaca; }
-
-        .bottom-nav {
-            position: fixed; bottom: 0; width: 100%; background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(15px); border-top: 1px solid var(--border);
-            display: flex; height: 85px; padding-bottom: 20px; z-index: 100; box-shadow: 0 -4px 20px rgba(0,0,0,0.05);
-        }
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-dim); font-size: 9px; font-weight: 800; text-decoration: none; }
-        .nav-item.active { color: var(--primary); }
-        .nav-icon { font-size: 22px; margin-bottom: 5px; }
-
-        .tag { padding: 4px 12px; border-radius: 20px; font-size: 10px; font-weight: 800; display: inline-block; }
-        .tag-nong { background: #fef2f2; color: var(--danger); border: 1px solid #fecaca;}
-        .tag-am { background: #fffbeb; color: var(--warning); border: 1px solid #fde68a;}
-        .tag-nguoi { background: #f0f9ff; color: var(--primary); border: 1px solid #bae6fd;}
-        .tag-chot { background: var(--gold-gradient); color: #fff; border: none; box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);}
-
-        .card.urgent { border: 1px solid var(--danger); background: #fff1f2; }
-        .urgent-badge { position: absolute; top: -12px; right: 15px; background: var(--danger); color: #fff; font-size: 10px; font-weight: 900; padding: 6px 12px; border-radius: 20px; animation: pulse 2s infinite; box-shadow: 0 4px 10px rgba(239, 68, 68, 0.3);}
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
-
-        #toast { position: fixed; top: 90px; left: 50%; transform: translateX(-50%); background: var(--success); color: #fff; padding: 14px 28px; border-radius: 30px; font-weight: 800; display: none; z-index: 1000; box-shadow: 0 5px 15px rgba(16, 185, 129, 0.4);}
-        
-        .cus-info { background: #f8fafc; padding: 12px; border-radius: 12px; margin-bottom: 15px; border: 1px solid var(--border);}
-        .cus-info p { margin: 6px 0; font-size: 13px; color: var(--text-dim); }
-        .cus-info strong { color: var(--text-main); }
-        .zalo-icon { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; background: #0068ff; border-radius: 5px; margin-left: 8px; vertical-align: middle; box-shadow: 0 2px 5px rgba(0, 104, 255, 0.3);}
-        .zalo-icon img { width: 14px; height: 14px; }
-
-        .card.read { opacity: 0.6; background: #f8fafc; border-left-color: var(--border) !important; filter: grayscale(0.5); }
-
-        .card-hunted-compact {
-            padding: 10px 12px !important;
-            margin-bottom: 8px !important;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 10px;
-            border-radius: 12px !important;
-        }
-        .hunted-text-box {
-            flex: 1;
-            overflow: hidden;
-        }
-        .hunted-text-box p {
-            margin: 0;
-            font-size: 13px;
-            white-space: nowrap; 
-            overflow: hidden;
-            text-overflow: ellipsis; 
-            color: var(--text-main);
-            font-weight: 500;
-        }
-        .hunted-btns-compact {
-            display: flex;
-            gap: 5px;
-            flex-shrink: 0;
-        }
-        .btn-mini {
-            padding: 6px 10px !important;
-            font-size: 11px !important;
-            width: auto !important;
-            border-radius: 8px !important;
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
     </style>
 </head>
-<body>
+<body class="bg-slate-900 text-slate-100 min-h-screen pb-12">
 
-    <div id="login-screen">
-        <div class="login-box">
-            <h2>HỆ THỐNG BẢO MẬT</h2>
-            <p>SANG AUTO PRO CRM</p>
-            <input type="password" id="access-key" placeholder="••••••">
-            <button class="btn btn-main" style="margin-top: 10px;" onclick="verifyAccess()">MỞ KHÓA DỮ LIỆU</button>
+    <!-- Auth / Key Check Screen -->
+    <div id="authScreen" class="fixed inset-0 bg-slate-950 flex items-center justify-center p-4 z-50">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 w-full max-w-md shadow-2xl">
+            <div class="flex items-center justify-center w-12 h-12 bg-emerald-500/10 text-emerald-400 rounded-xl mb-4 mx-auto">
+                <i data-lucide="wallet"></i>
+            </div>
+            <h1 class="text-xl font-bold text-center text-white mb-2">Quản Lý Tài Chính</h1>
+            <p class="text-xs text-slate-400 text-center mb-6">Mã truy cập giúp đồng bộ và bảo mật dữ liệu Firebase của bạn.</p>
+            
+            <form id="authForm" onsubmit="handleAuth(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-medium text-slate-400 mb-1">Mã truy cập (Access Key)</label>
+                    <input type="password" id="accessKeyInput" placeholder="Nhập mã truy cập..." required
+                        class="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-emerald-500 text-white placeholder-slate-500">
+                </div>
+                <button type="submit" class="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-semibold py-2.5 rounded-xl transition duration-200 text-sm flex items-center justify-center gap-2">
+                    <i data-lucide="log-in" class="w-4 h-4"></i> Truy Cập Hệ Thống
+                </button>
+            </form>
         </div>
     </div>
 
-    <div id="app-content">
-        <div id="toast">Thành công!</div>
-        <div class="header"><h1>SANG AUTO PRO</h1><span>PREMIUM CRM SYSTEM</span></div>
-
-        <div class="container">
-            <div id="tab-input" class="tab-content active">
-                <h2 class="section-title">Phân loại dữ liệu</h2>
-                <div class="card">
-                    <select id="form-type" onchange="toggleFormFields()">
-                        <option value="mua">🛒 KHÁCH CẦN MUA XE</option>
-                        <option value="ban">🚗 KHÁCH CẦN BÁN XE</option>
-                    </select>
+    <!-- Main Application UI -->
+    <div id="mainApp" class="hidden max-w-4xl mx-auto px-4 pt-6">
+        <!-- Top Bar -->
+        <header class="flex items-center justify-between pb-6 border-b border-slate-800 mb-6">
+            <div class="flex items-center gap-3">
+                <div class="p-2.5 bg-emerald-500/10 text-emerald-400 rounded-xl border border-emerald-500/20">
+                    <i data-lucide="coins" class="w-6 h-6"></i>
                 </div>
+                <div>
+                    <h1 class="text-lg font-bold text-white">Sổ Thu Chi Firebase</h1>
+                    <p class="text-xs text-slate-400">Đồng bộ dữ liệu thời gian thực</p>
+                </div>
+            </div>
+            <button onclick="logout()" class="p-2 text-slate-400 hover:text-rose-400 hover:bg-slate-800 rounded-lg transition" title="Đăng xuất">
+                <i data-lucide="log-out" class="w-5 h-5"></i>
+            </button>
+        </header>
 
-                <h2 class="section-title">Thông tin cơ bản</h2>
-                <div class="card">
-                    <label>Tên khách hàng</label>
-                    <input type="text" id="cus-name" placeholder="VD: Anh Tuấn">
-                    <label>Số điện thoại</label>
-                    <input type="tel" id="cus-phone" placeholder="09xxxxxxxxx">
-                    <label>Loại xe <span id="lbl-xe">khách cần</span></label>
-                    <input type="text" id="cus-car" placeholder="VD: Mazda 3, CX5...">
-                    <label>Đời xe, màu xe</label>
-                    <input type="text" id="cus-year-color" placeholder="VD: 2022, Trắng">
+        <!-- Balance Overview Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <!-- Balance Card -->
+            <div class="bg-slate-800/80 border border-slate-700/60 rounded-2xl p-4 relative overflow-hidden">
+                <div class="flex justify-between items-start mb-2">
+                    <span class="text-xs font-medium text-slate-400">Số Dư Hiện Tại</span>
+                    <i data-lucide="scale" class="w-4 h-4 text-emerald-400"></i>
+                </div>
+                <div id="totalBalance" class="text-2xl font-bold text-white mb-1">0 ₫</div>
+                <p class="text-[11px] text-slate-400">Thu nhập ròng khả dụng</p>
+            </div>
 
-                    <div id="field-finance-mua">
-                        <label>Tài chính</label>
-                        <input type="text" id="cus-finance-mua" placeholder="VD: 500tr mặt">
-                    </div>
-                    <div id="field-finance-ban" style="display: none;">
-                        <label>Tình trạng tài chính xe</label>
-                        <select id="cus-finance-ban">
-                            <option value="Không vay">Không vay (Pháp lý chuẩn)</option>
-                            <option value="Đang vay">Đang vay Ngân hàng</option>
+            <!-- Income Card -->
+            <div class="bg-slate-800/80 border border-slate-700/60 rounded-2xl p-4">
+                <div class="flex justify-between items-start mb-2">
+                    <span class="text-xs font-medium text-emerald-400">Tổng Thu</span>
+                    <i data-lucide="arrow-down-left" class="w-4 h-4 text-emerald-400"></i>
+                </div>
+                <div id="totalIncome" class="text-xl font-bold text-emerald-400 mb-1">+0 ₫</div>
+                <p class="text-[11px] text-slate-400">Các khoản tiền vào</p>
+            </div>
+
+            <!-- Expense Card -->
+            <div class="bg-slate-800/80 border border-slate-700/60 rounded-2xl p-4">
+                <div class="flex justify-between items-start mb-2">
+                    <span class="text-xs font-medium text-rose-400">Tổng Chi</span>
+                    <i data-lucide="arrow-up-right" class="w-4 h-4 text-rose-400"></i>
+                </div>
+                <div id="totalExpense" class="text-xl font-bold text-rose-400 mb-1">-0 ₫</div>
+                <p class="text-[11px] text-slate-400">Các khoản chi tiêu / đầu tư</p>
+            </div>
+        </div>
+
+        <!-- Add Transaction Form -->
+        <div class="bg-slate-800/50 border border-slate-800 rounded-2xl p-5 mb-8">
+            <h2 class="text-sm font-semibold text-white mb-4 flex items-center gap-2">
+                <i data-lucide="plus-circle" class="w-4 h-4 text-emerald-400"></i> Thêm Giao Dịch Mới
+            </h2>
+            
+            <form id="transactionForm" onsubmit="addTransaction(event)" class="space-y-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+                    <!-- Type -->
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1">Loại Giao Dịch</label>
+                        <select id="txType" required onchange="updateCategories()"
+                            class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500">
+                            <option value="expense">Khoản Chi (-)</option>
+                            <option value="income">Khoản Thu (+)</option>
                         </select>
                     </div>
 
-                    <label>Phân loại khách</label>
-                    <select id="cus-tag">
-                        <option value="nong">🔥 NÓNG (2 ngày)</option>
-                        <option value="am">⚡ ẤM (7 ngày)</option>
-                        <option value="nguoi">❄️ NGUỘI (14 ngày)</option>
+                    <!-- Amount -->
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1">Số Tiền (VNĐ)</label>
+                        <input type="number" id="txAmount" placeholder="0" min="1000" step="1000" required
+                            class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500">
+                    </div>
+
+                    <!-- Category -->
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1">Danh Mục</label>
+                        <select id="txCategory" required
+                            class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500">
+                            <!-- Populated dynamically -->
+                        </select>
+                    </div>
+
+                    <!-- Date -->
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1">Ngày Ghi Nhận</label>
+                        <input type="date" id="txDate" required
+                            class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <!-- Payment Method -->
+                    <div>
+                        <label class="block text-xs text-slate-400 mb-1">Phương Thức</label>
+                        <select id="txMethod" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500">
+                            <option value="Chuyển khoản">Chuyển khoản (CK)</option>
+                            <option value="Tiền mặt">Tiền mặt</option>
+                            <option value="Thẻ tín dụng">Thẻ tín dụng</option>
+                        </select>
+                    </div>
+
+                    <!-- Note -->
+                    <div class="sm:col-span-2">
+                        <label class="block text-xs text-slate-400 mb-1">Ghi Chú / Chi Tiết</label>
+                        <input type="text" id="txNote" placeholder="Ví dụ: Mua nguyên liệu quầy bar, Tiền xăng xe..." required
+                            class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500">
+                    </div>
+                </div>
+
+                <div class="flex justify-end pt-2">
+                    <button type="submit" class="bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-semibold px-5 py-2.5 rounded-xl transition text-sm flex items-center gap-2">
+                        <i data-lucide="check" class="w-4 h-4"></i> Lưu Giao Dịch
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Transactions List Section -->
+        <div class="bg-slate-800/40 border border-slate-800 rounded-2xl p-5">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+                <h2 class="text-sm font-semibold text-white flex items-center gap-2">
+                    <i data-lucide="list-ordered" class="w-4 h-4 text-emerald-400"></i> Lịch Sử Giao Dịch
+                </h2>
+
+                <!-- Filters -->
+                <div class="flex items-center gap-2">
+                    <select id="filterType" onchange="renderTransactions()" class="bg-slate-900 border border-slate-700 text-xs rounded-lg px-2.5 py-1.5 text-slate-300">
+                        <option value="all">Tất cả loại</option>
+                        <option value="income">Chỉ khoản thu</option>
+                        <option value="expense">Chỉ khoản chi</option>
                     </select>
-
-                    <label id="lbl-detail">Ghi chú yêu cầu</label>
-                    <textarea id="cus-detail" style="height: 100px;"></textarea>
-
-                    <div id="field-images" style="display: none;">
-                        <label>Hình ảnh xe thực tế</label>
-                        <input type="file" id="cus-images" accept="image/*" multiple onchange="handleImagePreview(this)">
-                        <div class="image-grid" id="preview-grid"></div>
-                    </div>
-
-                    <button class="btn btn-main" id="btn-save" onclick="saveCustomer()">💾 LƯU DỮ LIỆU KHÁCH</button>
+                    <input type="text" id="searchInput" onkeyup="renderTransactions()" placeholder="Tìm ghi chú..." 
+                        class="bg-slate-900 border border-slate-700 text-xs rounded-lg px-2.5 py-1.5 text-slate-300 focus:outline-none focus:border-emerald-500">
                 </div>
             </div>
 
-            <div id="tab-buyers" class="tab-content">
-                <input type="text" class="search-bar" id="search-buyer" placeholder="🔍 Tìm khách mua..." oninput="renderList('mua')">
-                <div id="list-buyers"></div>
+            <!-- List Container -->
+            <div id="transactionList" class="space-y-2 max-h-[500px] overflow-y-auto pr-1">
+                <!-- Transactions will be loaded here dynamically -->
             </div>
-
-            <div id="tab-sellers" class="tab-content">
-                <input type="text" class="search-bar" id="search-seller" placeholder="🔍 Tìm khách bán..." oninput="renderList('ban')">
-                <div id="list-sellers"></div>
-            </div>
-
-            <div id="tab-closed" class="tab-content">
-                <input type="text" class="search-bar" id="search-closed" placeholder="🔍 Tìm đã chốt..." oninput="renderList('chot')">
-                <div id="list-closed"></div>
-            </div>
-
-            <div id="tab-hunt" class="tab-content">
-                <h2 class="section-title">Cấu hình Bot săn tin</h2>
-                <div class="card">
-                    <label>Từ khóa lọc (Cách nhau bằng dấu phẩy)</label>
-                    <input type="text" id="hunt-keywords" placeholder="VD: chính chủ, xpander...">
-                    <label>Thời gian nghỉ (Phút)</label>
-                    <input type="number" id="hunt-interval" value="10">
-                    <button class="btn btn-main" style="background: var(--purple-gradient)" onclick="saveBotSettings()">⚙️ CẬP NHẬT LỆNH</button>
-                </div>
-                
-                <h2 class="section-title">Phân Tích Bắt Số Nhanh</h2>
-                <div class="card">
-                    <label>Dán nội dung bài viết vào đây</label>
-                    <textarea id="hunt-parser" style="height: 100px; margin-bottom: 0;" placeholder="VD: Cần bán Xpander liên hệ 090.123.4567..."></textarea>
-                    
-                    <div id="parser-actions" style="display: none; gap: 10px; margin-top: 15px;">
-                        <a id="btn-zalo-link" href="#" target="_blank" class="btn btn-main" style="background: #0068ff; flex: 1; text-decoration: none; box-shadow: 0 4px 15px rgba(0, 104, 255, 0.3);">💬 ZALO</a>
-                        <a id="btn-call-link" href="#" class="btn btn-success" style="flex: 1; text-decoration: none;">📞 GỌI LUÔN</a>
-                    </div>
-                </div>
-
-                <h2 class="section-title">Tin mới săn được <button class="btn btn-danger btn-mini" style="margin-left: auto; width: auto; padding: 4px 10px;" onclick="deleteAllHunted()">🗑️ XÓA TẤT CẢ</button></h2>
-                <div id="list-hunted"></div>
-            </div>
-
-            <div id="tab-templates" class="tab-content">
-                <h2 class="section-title">Cấu Hình Cụm Group & Mẫu</h2>
-                <div class="card">
-                    <label>Tên Cụm (VD: Cụm Xpander, Cụm Xe Cỏ)</label>
-                    <input type="text" id="cluster-name" placeholder="Nhập tên cụm...">
-                    
-                    <label>Danh sách Link Group</label>
-                    <div id="group-inputs-container">
-                        <div class="dynamic-input-group" style="position: relative; margin-bottom: 12px; background: #f8fafc; padding: 12px; border-radius: 12px; border: 1px solid var(--border);">
-                            <input type="text" class="cluster-group-name" placeholder="Tên Group (VD: Hội Vios...)" style="margin-bottom: 8px;">
-                            <input type="text" class="cluster-group-link" placeholder="https://facebook.com/groups/..." style="margin-bottom: 0;">
-                        </div>
-                    </div>
-                    <button class="btn btn-check" style="margin-bottom: 20px;" onclick="addGroupInput()">➕ THÊM GROUP MỚI</button>
-                    
-                    <label>Danh sách Nội dung mẫu</label>
-                    <div id="template-inputs-container">
-                        <div class="dynamic-input-group" style="position: relative; margin-bottom: 10px;">
-                            <textarea class="cluster-template-input" style="height: 80px; margin-bottom: 0;" placeholder="Nội dung 1..."></textarea>
-                        </div>
-                    </div>
-                    
-                    <button class="btn btn-check" style="margin-bottom: 20px;" onclick="addTemplateInput()">➕ THÊM NỘI DUNG MẪU</button>
-
-                    <button class="btn btn-main" style="background: var(--green-gradient)" id="btn-cluster-save" onclick="saveCluster()">💾 LƯU CỤM NÀY</button>
-                    <button class="btn btn-danger btn-mini" id="btn-cluster-cancel" style="display:none; margin-top:10px;" onclick="resetClusterForm()">🚫 HỦY CHỈNH SỬA</button>
-                </div>
-                <h2 class="section-title">Danh Sách Các Cụm Sẵn Sàng</h2>
-                <div id="list-clusters"></div>
-            </div>
-
         </div>
+    </div>
 
-        <div class="bottom-nav">
-            <a href="javascript:void(0)" class="nav-item active" onclick="switchTab('input', this)"><span class="nav-icon">📝</span><span>NHẬP</span></a>
-            <a href="javascript:void(0)" class="nav-item" onclick="switchTab('buyers', this)"><span class="nav-icon">🛒</span><span>MUA</span></a>
-            <a href="javascript:void(0)" class="nav-item" onclick="switchTab('sellers', this)"><span class="nav-icon">🚗</span><span>BÁN</span></a>
-            <a href="javascript:void(0)" class="nav-item" onclick="switchTab('closed', this)"><span class="nav-icon">🏆</span><span>CHỐT</span></a>
-            <a href="javascript:void(0)" class="nav-item" onclick="switchTab('hunt', this)"><span class="nav-icon">🎯</span><span>SĂN</span></a>
-            <a href="javascript:void(0)" class="nav-item" onclick="switchTab('templates', this)"><span class="nav-icon">📚</span><span>MẪU</span></a>
-        </div>
-    </div> 
+    <!-- Firebase Modular SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-    <script>
+        // Configuration matching Firebase Realtime Database
         const firebaseConfig = {
-            apiKey: "AIzaSyBVz4zVh8gxmNS4vbx39t0mVP7ZJJqH9T8",
-            databaseURL: "https://sang-post-auto-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "sang-post-auto"
+            databaseURL: "https://auto-72a39-default-rtdb.asia-southeast1.firebasedatabase.app/"
         };
-        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
-        const IMGBB_KEY = "a4b55574ff83037588382d5f83783ea1";
-        let editingClusterId = null;
 
-        function verifyAccess() {
-            if (document.getElementById('access-key').value === '190525') {
-                sessionStorage.setItem('crm_unlocked', 'true');
-                location.reload();
-            } else { alert('Sai mã!'); }
-        }
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
 
-        document.addEventListener("DOMContentLoaded", () => {
-            if (sessionStorage.getItem('crm_unlocked') === 'true') {
-                document.getElementById('login-screen').style.display = 'none';
-                document.getElementById('app-content').style.display = 'block';
+        let accessKey = '';
+        let transactions = [];
+
+        const categories = {
+            expense: ["Ăn uống", "Quầy Bar / Cửa hàng", "Xe cộ & Đi lại", "Trading / Đầu tư", "Sinh hoạt / Nhà cửa", "Giải trí", "Khác"],
+            income: ["Doanh thu bán hàng", "Thu nhập Trading", "Lương / Thưởng", "Thu nợ", "Khác"]
+        };
+
+        // Make functions globally available
+        window.handleAuth = function(e) {
+            e.preventDefault();
+            const key = document.getElementById('accessKeyInput').value.trim();
+            if (key) {
+                accessKey = key;
+                localStorage.setItem('fin_access_key', key);
+                initApp();
             }
-        });
+        };
 
-        let allCustomers = [];
+        window.logout = function() {
+            localStorage.removeItem('fin_access_key');
+            location.reload();
+        };
 
-        function switchTab(id, el) {
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            document.getElementById('tab-' + id).classList.add('active');
-            el.classList.add('active');
+        window.updateCategories = function() {
+            const type = document.getElementById('txType').value;
+            const categorySelect = document.getElementById('txCategory');
+            categorySelect.innerHTML = categories[type].map(c => `<option value="${c}">${c}</option>`).join('');
+        };
+
+        function initApp() {
+            document.getElementById('authScreen').classList.add('hidden');
+            document.getElementById('mainApp').classList.remove('hidden');
+            document.getElementById('txDate').value = new Date().toISOString().split('T')[0];
+            window.updateCategories();
+
+            // Listen to Realtime Database changes under node based on accessKey
+            const txRef = ref(db, `finance_records/${accessKey}`);
+            onValue(txRef, (snapshot) => {
+                const data = snapshot.val();
+                transactions = [];
+                if (data) {
+                    Object.keys(data).forEach(id => {
+                        transactions.push({ id, ...data[id] });
+                    });
+                    transactions.sort((a, b) => new Date(b.date) - new Date(a.date));
+                }
+                updateSummary();
+                renderTransactions();
+            });
         }
 
-        function toggleFormFields() {
-            const isMua = document.getElementById('form-type').value === 'mua';
-            document.getElementById('lbl-xe').innerText = isMua ? "khách cần" : "khách bán";
-            document.getElementById('field-finance-mua').style.display = isMua ? "block" : "none";
-            document.getElementById('field-finance-ban').style.display = isMua ? "none" : "block";
-            document.getElementById('field-images').style.display = isMua ? "none" : "block";
-        }
+        window.addTransaction = function(e) {
+            e.preventDefault();
+            const type = document.getElementById('txType').value;
+            const amount = parseFloat(document.getElementById('txAmount').value);
+            const category = document.getElementById('txCategory').value;
+            const date = document.getElementById('txDate').value;
+            const method = document.getElementById('txMethod').value;
+            const note = document.getElementById('txNote').value.trim();
 
-        function handleImagePreview(input) {
-            const grid = document.getElementById('preview-grid'); grid.innerHTML = "";
-            if (input.files) {
-                Array.from(input.files).forEach(file => {
-                    const reader = new FileReader();
-                    reader.onload = (e) => grid.innerHTML += `<div class="image-item"><img src="${e.target.result}"></div>`;
-                    reader.readAsDataURL(file);
-                });
-            }
-        }
+            if (!amount || amount <= 0) return;
 
-        async function uploadImages(files) {
-            const urls = [];
-            for (let file of files) {
-                try {
-                    const compressed = await imageCompression(file, { maxSizeMB: 0.5, maxWidthOrHeight: 1024 });
-                    const fd = new FormData(); fd.append("image", compressed);
-                    const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_KEY}`, { method: "POST", body: fd });
-                    const data = await res.json();
-                    if(data.success) urls.push(data.data.url);
-                } catch (e) { console.error(e); }
-            }
-            return urls;
-        }
-
-        async function saveCustomer() {
-            const name = document.getElementById('cus-name').value.trim();
-            const phone = document.getElementById('cus-phone').value.trim();
-            if(!name || !phone) return alert("Nhập Tên và SĐT!");
-
-            const btn = document.getElementById('btn-save');
-            btn.disabled = true; btn.innerHTML = "⏳ ĐANG LƯU...";
-
-            const type = document.getElementById('form-type').value;
-            let imgs = [];
-            if(type === 'ban') imgs = await uploadImages(document.getElementById('cus-images').files);
-
-            const newId = 'cus_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
-            
-            const data = {
-                id: newId,
-                type: type,
-                status: 'active',
-                name: name,
-                phone: phone,
-                car: document.getElementById('cus-car').value,
-                year_color: document.getElementById('cus-year-color').value,
-                finance: type === 'mua' ? document.getElementById('cus-finance-mua').value : document.getElementById('cus-finance-ban').value,
-                tag: document.getElementById('cus-tag').value,
-                details: document.getElementById('cus-detail').value,
-                images: imgs,
-                created_at: Date.now(),
-                last_checked: Date.now()
+            const newTx = {
+                type,
+                amount,
+                category,
+                date,
+                method,
+                note,
+                createdAt: Date.now()
             };
 
-            await db.ref('crm_customers/' + newId).set(data);
-            alert("Đã lưu!"); location.reload();
+            const txRef = ref(db, `finance_records/${accessKey}`);
+            push(txRef, newTx).then(() => {
+                document.getElementById('txAmount').value = '';
+                document.getElementById('txNote').value = '';
+            }).catch(err => alert("Lỗi khi kết nối Firebase: " + err.message));
+        };
+
+        window.deleteTransaction = function(id) {
+            if (confirm("Bạn có chắc chắn muốn xóa giao dịch này không?")) {
+                const itemRef = ref(db, `finance_records/${accessKey}/${id}`);
+                remove(itemRef);
+            }
+        };
+
+        function updateSummary() {
+            let income = 0;
+            let expense = 0;
+
+            transactions.forEach(t => {
+                if (t.type === 'income') income += t.amount;
+                if (t.type === 'expense') expense += t.amount;
+            });
+
+            const balance = income - expense;
+
+            document.getElementById('totalBalance').innerText = formatCurrency(balance);
+            document.getElementById('totalIncome').innerText = '+' + formatCurrency(income);
+            document.getElementById('totalExpense').innerText = '-' + formatCurrency(expense);
         }
 
-        db.ref('crm_customers').on('value', snap => {
-            allCustomers = [];
-            snap.forEach(c => {
-                let val = c.val();
-                if(!val.id) val.id = c.key;
-                allCustomers.push(val);
+        window.renderTransactions = function() {
+            const listEl = document.getElementById('transactionList');
+            const filterType = document.getElementById('filterType').value;
+            const search = document.getElementById('searchInput').value.toLowerCase().trim();
+
+            const filtered = transactions.filter(t => {
+                const matchType = filterType === 'all' || t.type === filterType;
+                const matchSearch = t.note.toLowerCase().includes(search) || t.category.toLowerCase().includes(search);
+                return matchType && matchSearch;
             });
-            renderList('mua'); renderList('ban'); renderList('chot');
-        });
 
-        function renderList(tab) {
-            const container = document.getElementById(tab === 'mua' ? 'list-buyers' : (tab === 'ban' ? 'list-sellers' : 'list-closed'));
-            const search = document.getElementById(tab === 'mua' ? 'search-buyer' : (tab === 'ban' ? 'search-seller' : 'search-closed')).value.toLowerCase();
-            
-            let filtered = allCustomers.filter(c => tab === 'chot' ? c.status === 'chot' : (c.type === tab && c.status !== 'chot'));
-            if(search) filtered = filtered.filter(c => (c.name+c.phone+c.car).toLowerCase().includes(search));
-
-            const now = Date.now();
-            let html = "";
-            filtered.reverse().forEach(cus => {
-                const limit = cus.tag === 'nong' ? 2 : (cus.tag === 'am' ? 7 : 14);
-                const isUrgent = (tab !== 'chot') && (now - (cus.last_checked || cus.created_at) > limit * 86400000);
-                
-                // --- BẮT ĐẦU ĐOẠN CODE ĐÃ ĐƯỢC CHỈNH SỬA CHO LINK FACEBOOK ---
-                let contactText = cus.phone ? String(cus.phone) : '';
-                let contactDisplayHtml = '';
-                
-                if (contactText.includes('facebook.com') || contactText.includes('fb.com') || contactText.includes('m.me')) {
-                    contactDisplayHtml = `<p>🔗 Link: <strong style="word-break: break-all;"><a href="${contactText}" target="_blank" style="color: var(--text-main); text-decoration: none;">${contactText}</a></strong> 
-                       <a href="${contactText}" target="_blank" class="zalo-icon" style="background: #1877F2;"><svg style="width:14px; height:14px; fill:white;" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.469h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.469h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></a>
-                    </p>`;
-                } else {
-                    const cleanPhone = contactText.replace(/\D/g,'');
-                    contactDisplayHtml = `<p>📞 SĐT: <strong>${contactText}</strong> 
-                       <a href="https://zalo.me/${cleanPhone}" target="_blank" class="zalo-icon"><img src="https://upload.wikimedia.org/wikipedia/commons/9/91/Icon_of_Zalo.svg"></a>
-                    </p>`;
-                }
-                // --- KẾT THÚC ĐOẠN CODE CHỈNH SỬA ---
-
-                html += `
-                <div class="card ${isUrgent ? 'urgent' : ''}">
-                    ${isUrgent ? `<div class="urgent-badge">🚨 QUÁ ${limit} NGÀY</div>` : ''}
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                        <strong style="font-size:16px; color: var(--primary);">${cus.name}</strong>
-                        <span class="tag tag-${cus.tag || 'nguoi'}">${cus.tag === 'nong' ? '🔥 NÓNG' : (cus.tag === 'am' ? '⚡ ẤM' : '❄️ NGUỘI')}</span>
-                    </div>
-                    <div class="cus-info">
-                        ${contactDisplayHtml}
-                        <p>🚗 Xe: <strong>${cus.car}</strong> (${cus.year_color})</p>
-                        <p>💰 Tài chính: <strong>${cus.finance}</strong></p>
-                        <p>📝 Ghi chú: ${cus.details}</p>
+            if (filtered.length === 0) {
+                listEl.innerHTML = `
+                    <div class="text-center py-8 text-slate-500 text-xs">
+                        Chưa có giao dịch nào được ghi nhận.
                     </div>`;
-
-                if(cus.images && Array.isArray(cus.images) && cus.images.length > 0) {
-                    html += `<div class="image-grid">`;
-                    cus.images.forEach(img => html += `<div class="image-item"><img src="${img}" onclick="window.open('${img}')"></div>`);
-                    html += `</div>`;
-                }
-
-                html += `
-                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-top:10px;">
-                        ${cus.status !== 'chot' ? `
-                            <button class="btn btn-check" onclick="markChecked('${cus.id}')">📞 ĐÃ LIÊN HỆ</button>
-                            <button class="btn btn-success" onclick="markClosed('${cus.id}')">🏆 CHỐT</button>
-                        ` : ''}
-                        <button class="btn btn-danger" style="grid-column: span ${cus.status === 'chot' ? 2 : 1}" onclick="deleteCus('${cus.id}')">🗑️ XÓA</button>
-                    </div>
-                </div>`;
-            });
-            container.innerHTML = html || "<p style='text-align:center;color:#666;'>Trống.</p>";
-        }
-
-        function markChecked(id) { db.ref('crm_customers/' + id).update({ last_checked: Date.now() }); }
-        function markClosed(id) { if(confirm("Chốt xe?")) db.ref('crm_customers/' + id).update({ status: 'chot', closed_at: Date.now() }); }
-        function deleteCus(id) { if(confirm("Xóa khách?")) db.ref('crm_customers/' + id).remove(); }
-
-        // --- BOT SĂN TIN ---
-        db.ref('config_bot').on('value', snap => {
-            if(snap.exists()){
-                const d = snap.val();
-                document.getElementById('hunt-keywords').value = d.keywords || "";
-                document.getElementById('hunt-interval').value = d.interval || 10;
+                return;
             }
-        });
 
-        function saveBotSettings() {
-            db.ref('config_bot').update({
-                keywords: document.getElementById('hunt-keywords').value,
-                interval: document.getElementById('hunt-interval').value
-            });
-            alert("Đã cập nhật lệnh Bot!");
-        }
-
-        db.ref('san_tin').limitToLast(100).on('value', snap => {
-            const div = document.getElementById('list-hunted'); div.innerHTML = "";
-            let items = []; 
-            
-            snap.forEach(c => {
-                let val = c.val();
-                val.id = c.key; 
-                items.push(val);
-            });
-            
-            items.sort((a, b) => {
-                let aUnread = a.isRead ? 0 : 1;
-                let bUnread = b.isRead ? 0 : 1;
-                if (aUnread !== bUnread) return bUnread - aUnread; 
-                return b.id.localeCompare(a.id);
-            });
-
-            items.forEach(item => {
-                const readClass = item.isRead ? 'read' : '';
-                const borderColor = item.isRead ? 'var(--border)' : 'var(--accent)';
-                
-                div.innerHTML += `
-                <div class="card card-hunted-compact ${readClass}" id="hunt-${item.id}" style="border-left:4px solid ${borderColor}">
-                    <div class="hunted-text-box">
-                        <p><strong style="color: var(--danger); text-transform: uppercase; margin-right: 5px;">[${item.keyword ? item.keyword : 'TIN MỚI'}]</strong>${item.content || 'Không có nội dung'}</p>
+            listEl.innerHTML = filtered.map(t => `
+                <div class="flex items-center justify-between p-3 bg-slate-900/60 border border-slate-800 rounded-xl hover:border-slate-700 transition">
+                    <div class="flex items-center gap-3">
+                        <div class="p-2 rounded-lg ${t.type === 'income' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}">
+                            <i data-lucide="${t.type === 'income' ? 'arrow-down-left' : 'arrow-up-right'}" class="w-4 h-4"></i>
+                        </div>
+                        <div>
+                            <div class="text-sm font-medium text-white">${escapeHtml(t.note)}</div>
+                            <div class="flex items-center gap-2 text-[11px] text-slate-400 mt-0.5">
+                                <span class="bg-slate-800 px-1.5 py-0.5 rounded text-slate-300">${t.category}</span>
+                                <span>•</span>
+                                <span>${t.method}</span>
+                                <span>•</span>
+                                <span>${t.date}</span>
+                            </div>
+                        </div>
                     </div>
-                    <div class="hunted-btns-compact">
-                        <a href="${item.link}" target="_blank" class="btn btn-check btn-mini">🌍 XEM</a>
-                        <button class="btn btn-success btn-mini" onclick="markHuntedRead('${item.id}')">✔️</button>
-                        <button class="btn btn-danger btn-mini" style="background:#fff" onclick="deleteHunted('${item.id}')">🗑️</button>
+                    <div class="flex items-center gap-3">
+                        <div class="text-right">
+                            <div class="text-sm font-bold ${t.type === 'income' ? 'text-emerald-400' : 'text-rose-400'}">
+                                ${t.type === 'income' ? '+' : '-'}${formatCurrency(t.amount)}
+                            </div>
+                        </div>
+                        <button onclick="deleteTransaction('${t.id}')" class="text-slate-500 hover:text-rose-400 p-1 transition" title="Xóa">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        </button>
                     </div>
-                </div>`;
-            });
-        });
+                </div>
+            `).join('');
 
-        function markHuntedRead(id) { db.ref('san_tin/' + id).update({ isRead: true }); }
-        function deleteHunted(id) { if(confirm("Bạn có chắc chắn muốn xóa tin này không?")) { db.ref('san_tin/' + id).remove(); } }
-        function deleteAllHunted() { if(confirm("Bạn có chắc chắn muốn xóa TẤT CẢ tin săn được không?")) { db.ref('san_tin').remove(); } }
-
-
-        // --- CODE MỚI THÊM: PHÂN TÍCH SDT TỪ ĐOẠN VĂN ---
-        document.getElementById('hunt-parser').addEventListener('input', function() {
-            const text = this.value;
-            // Xóa hết dấu phẩy, chấm, gạch ngang, khoảng trắng để tìm sdt cho dễ
-            const cleanText = text.replace(/[\.\s\-\,]/g, ''); 
-            // Tìm chuỗi 10 số bắt đầu bằng 0 và các đầu số hiện tại (3,5,7,8,9)
-            const phoneMatch = cleanText.match(/(0[35789]\d{8})/); 
-            
-            const actionsDiv = document.getElementById('parser-actions');
-            const btnZalo = document.getElementById('btn-zalo-link');
-            const btnCall = document.getElementById('btn-call-link');
-
-            if (phoneMatch && phoneMatch[0]) {
-                const phone = phoneMatch[0];
-                actionsDiv.style.display = 'flex';
-                btnZalo.href = `https://zalo.me/${phone}`;
-                btnCall.href = `tel:${phone}`;
-                btnZalo.innerHTML = `💬 ZALO (${phone})`;
-                btnCall.innerHTML = `📞 GỌI (${phone})`;
-            } else {
-                actionsDiv.style.display = 'none';
-            }
-        });
-
-
-        // ==========================================
-        // --- CHỨC NĂNG MỚI: QUẢN LÝ MẪU & GROUP ---
-        // ==========================================
-
-        let globalClusters = [];
-
-        function addGroupInput() {
-            const container = document.getElementById('group-inputs-container');
-            const div = document.createElement('div');
-            div.className = 'dynamic-input-group';
-            div.style.cssText = 'position: relative; margin-bottom: 12px; background: #f8fafc; padding: 12px; border-radius: 12px; border: 1px solid var(--border); animation: fadeIn 0.3s ease;';
-            div.innerHTML = `
-                <input type="text" class="cluster-group-name" placeholder="Tên Group (VD: Hội Vios...)" style="margin-bottom: 8px;">
-                <input type="text" class="cluster-group-link" placeholder="https://facebook.com/groups/..." style="margin-bottom: 0;">
-                <button class="btn btn-danger btn-mini" style="position: absolute; right: 12px; top: 12px; padding: 4px 8px; width: auto; font-size: 10px; background: #fee2e2; color: #ef4444; border: none;" onclick="this.parentElement.remove()">❌</button>
-            `;
-            container.appendChild(div);
+            lucide.createIcons();
         }
 
-        function addTemplateInput() {
-            const container = document.getElementById('template-inputs-container');
-            const count = container.querySelectorAll('.cluster-template-input').length;
-            const div = document.createElement('div');
-            div.className = 'dynamic-input-group';
-            div.style.cssText = 'position: relative; margin-bottom: 10px; animation: fadeIn 0.3s ease;';
-            div.innerHTML = `
-                <textarea class="cluster-template-input" style="height: 80px; margin-bottom: 0;" placeholder="Nội dung ${count + 1}..."></textarea>
-                <button class="btn btn-danger btn-mini" style="position: absolute; right: 8px; top: 8px; padding: 4px 8px; width: auto; font-size: 10px; background: #fee2e2; color: #ef4444; border: none;" onclick="this.parentElement.remove()">❌</button>
-            `;
-            container.appendChild(div);
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
         }
 
-        function saveCluster() {
-            const name = document.getElementById('cluster-name').value.trim();
-            if (!name) return alert("Vui lòng nhập Tên Cụm!");
-            const groupNodes = document.querySelectorAll('#group-inputs-container .dynamic-input-group');
-            let groups = [];
-            groupNodes.forEach(node => {
-                let gName = node.querySelector('.cluster-group-name').value.trim();
-                let gLink = node.querySelector('.cluster-group-link').value.trim();
-                if(gLink !== '') groups.push({ name: gName || "Group Chưa Đặt Tên", link: gLink, last_posted: 0 });
-            });
-            const templateInputs = document.querySelectorAll('.cluster-template-input');
-            let templates = [];
-            templateInputs.forEach(input => { if(input.value.trim() !== '') templates.push(input.value.trim()); });
-            if (groups.length === 0) return alert("Vui lòng nhập ít nhất 1 Group!");
-            if (templates.length === 0) return alert("Vui lòng nhập ít nhất 1 nội dung mẫu!");
-
-            const targetId = editingClusterId || ('cluster_' + Date.now());
-            const data = { name: name, groups: groups, templates: templates };
-            if(!editingClusterId) data.created_at = Date.now();
-
-            db.ref('marketing_clusters/' + targetId).update(data).then(() => {
-                resetClusterForm();
-                alert(editingClusterId ? "Đã cập nhật cụm!" : "Đã lưu Cụm thành công!");
+        function escapeHtml(str) {
+            return str.replace(/[&<>"']/g, function(m) {
+                return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
             });
         }
 
-        function resetClusterForm() {
-            editingClusterId = null;
-            document.getElementById('cluster-name').value = "";
-            document.getElementById('group-inputs-container').innerHTML = `<div class="dynamic-input-group" style="position: relative; margin-bottom: 12px; background: #f8fafc; padding: 12px; border-radius: 12px; border: 1px solid var(--border);"><input type="text" class="cluster-group-name" placeholder="Tên Group (VD: Hội Vios...)" style="margin-bottom: 8px;"><input type="text" class="cluster-group-link" placeholder="https://facebook.com/groups/..." style="margin-bottom: 0;"></div>`;
-            document.getElementById('template-inputs-container').innerHTML = `<div class="dynamic-input-group" style="position: relative; margin-bottom: 10px;"><textarea class="cluster-template-input" style="height: 80px; margin-bottom: 0;" placeholder="Nội dung 1..."></textarea></div>`;
-            const btn = document.getElementById('btn-cluster-save');
-            btn.innerHTML = "💾 LƯU CỤM NÀY"; btn.style.background = "var(--green-gradient)";
-            document.getElementById('btn-cluster-cancel').style.display = "none";
+        // Auto login if key stored
+        const savedKey = localStorage.getItem('fin_access_key');
+        if (savedKey) {
+            accessKey = savedKey;
+            initApp();
         }
 
-        function loadClusterToEdit(id) {
-            const cluster = globalClusters.find(c => c.id === id);
-            if(!cluster) return;
-            editingClusterId = id;
-            document.getElementById('cluster-name').value = cluster.name;
-            const gc = document.getElementById('group-inputs-container'); gc.innerHTML = "";
-            (cluster.groups || []).forEach(g => {
-                const div = document.createElement('div'); div.className = 'dynamic-input-group'; div.style.cssText = 'position: relative; margin-bottom: 12px; background: #f8fafc; padding: 12px; border-radius: 12px; border: 1px solid var(--border);';
-                div.innerHTML = `<input type="text" class="cluster-group-name" value="${g.name}" style="margin-bottom: 8px;"><input type="text" class="cluster-group-link" value="${g.link}" style="margin-bottom: 0;"><button class="btn btn-danger btn-mini" style="position: absolute; right: 12px; top: 12px; padding: 4px 8px; width: auto; font-size: 10px; background: #fee2e2; color: #ef4444; border: none;" onclick="this.parentElement.remove()">❌</button>`;
-                gc.appendChild(div);
-            });
-            const tc = document.getElementById('template-inputs-container'); tc.innerHTML = "";
-            (cluster.templates || []).forEach(t => {
-                const div = document.createElement('div'); div.className = 'dynamic-input-group'; div.style.cssText = 'position: relative; margin-bottom: 10px;';
-                div.innerHTML = `<textarea class="cluster-template-input" style="height: 80px; margin-bottom: 0;">${t}</textarea><button class="btn btn-danger btn-mini" style="position: absolute; right: 8px; top: 8px; padding: 4px 8px; width: auto; font-size: 10px; background: #fee2e2; color: #ef4444; border: none;" onclick="this.parentElement.remove()">❌</button>`;
-                tc.appendChild(div);
-            });
-            const btn = document.getElementById('btn-cluster-save'); btn.innerHTML = "💾 CẬP NHẬT CỤM"; btn.style.background = "var(--purple-gradient)";
-            document.getElementById('btn-cluster-cancel').style.display = "block";
-            window.scrollTo({top: 0, behavior: 'smooth'});
-        }
-
-        db.ref('marketing_clusters').on('value', snap => {
-            globalClusters = []; snap.forEach(c => { let val = c.val(); val.id = c.key; globalClusters.push(val); });
-            renderClusters();
-        });
-
-        function renderClusters() {
-            const div = document.getElementById('list-clusters'); div.innerHTML = "";
-            if (globalClusters.length === 0) { div.innerHTML = "<p style='text-align:center;color:#666;'>Chưa có Cụm nào.</p>"; return; }
-            let html = ""; const now = Date.now(); const TWO_HOURS = 2 * 60 * 60 * 1000;
-            [...globalClusters].reverse().forEach(cluster => {
-                html += `<div class="card"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 10px;"><strong style="color:var(--primary); font-size: 15px; text-transform: uppercase;">${cluster.name}</strong></div><div style="margin-bottom: 12px;"><strong style="font-size: 11px; color: var(--text-dim); text-transform: uppercase;">Các Group trong Cụm:</strong><div style="display: flex; flex-direction: column; gap: 8px; margin-top: 8px;">`;
-                let groupList = cluster.groups || []; (groupList).forEach((g, index) => {
-                    let isPosted = g.last_posted > 0; let borderColor = "var(--border)"; let statusText = "Chưa đăng";
-                    if (isPosted) { let timeDiff = now - g.last_posted; if (timeDiff < TWO_HOURS) { borderColor = "var(--danger)"; statusText = getElapsedTime(g.last_posted); } else { borderColor = "var(--success)"; statusText = "Đã qua 2 tiếng - Có thể đăng lại"; } }
-                    html += `<div style="border: 2px solid ${borderColor}; padding: 10px; border-radius: 10px; display: flex; justify-content: space-between; align-items: center; background: #fff;"><div style="flex: 1; overflow: hidden; padding-right: 10px;"><strong style="font-size: 13px; color: var(--text-main); display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${g.name}</strong><a href="${g.link}" target="_blank" style="font-size: 11px; color: var(--primary); text-decoration: none;">🔗 Chuyển đến Group</a><div style="font-size: 10px; color: ${borderColor === 'var(--danger)' ? 'var(--danger)' : 'var(--success)'}; margin-top: 2px; font-weight: bold;">${statusText}</div></div><button class="btn btn-success btn-mini" style="width: auto; flex-shrink: 0;" onclick="markGroupPosted('${cluster.id}', ${index})">ĐÃ ĐĂNG</button></div>`;
-                });
-                html += `</div></div><hr style="border:none; border-top:1px dashed var(--border); margin: 15px 0;"><strong style="font-size: 11px; color: var(--text-dim); text-transform: uppercase; display:block; margin-bottom: 8px;">Kho mẫu cho Cụm này:</strong><div style="max-height: 250px; overflow-y: auto;">`;
-                if(cluster.templates && cluster.templates.length > 0) { cluster.templates.forEach((t) => { html += `<div style="background:#f8fafc; padding:12px; border-radius:10px; margin-bottom:10px; position:relative; border: 1px solid var(--border);"><p style="margin:0; font-size:13px; white-space:pre-wrap; padding-right: 60px;">${t}</p><button class="btn btn-main btn-mini" style="position:absolute; right:10px; top:10px; width:auto; padding:6px 12px;" onclick="copyText(this, \`${t.replace(/`/g, '\\`')}\`)">COPY</button></div>`; }); }
-                html += `</div><div style="margin-top:15px; text-align:right; display:flex; gap:10px; justify-content:flex-end;"><button class="btn btn-check btn-mini" onclick="loadClusterToEdit('${cluster.id}')">✏️ SỬA CỤM</button><button class="btn btn-danger btn-mini" style="background:transparent; border: 1px solid var(--danger);" onclick="deleteCluster('${cluster.id}')">🗑️ XÓA</button></div></div>`;
-            });
-            div.innerHTML = html;
-        }
-
-        setInterval(() => { if (document.getElementById('tab-templates').classList.contains('active')) renderClusters(); }, 60000);
-        function markGroupPosted(clusterId, groupIndex) { db.ref(`marketing_clusters/${clusterId}/groups/${groupIndex}`).update({ last_posted: Date.now() }); }
-        function deleteCluster(id) { if(confirm("Bạn có chắc chắn muốn xóa toàn bộ Cụm này?")) { db.ref('marketing_clusters/' + id).remove(); } }
-        function copyText(btn, text) { if (navigator.clipboard) { navigator.clipboard.writeText(text).then(() => { let old = btn.innerText; btn.innerText = "ĐÃ COPY!"; btn.style.background = "var(--success)"; setTimeout(() => { btn.innerText = old; btn.style.background = "var(--accent-gradient)"; }, 2000); }); } else { const ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); let old = btn.innerText; btn.innerText = "ĐÃ COPY!"; setTimeout(() => btn.innerText = old, 2000); } }
-        function getElapsedTime(timestamp) { if(!timestamp) return ""; const diff = Date.now() - timestamp; const mins = Math.floor(diff / 60000); if(mins < 1) return `Vừa đăng`; if(mins < 60) return `Đã đăng ${mins} phút trước`; const hrs = Math.floor(mins / 60); return `Đã đăng ${hrs} giờ ${mins % 60} phút trước`; }
+        lucide.createIcons();
     </script>
 </body>
 </html>
