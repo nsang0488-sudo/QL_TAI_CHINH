@@ -138,7 +138,7 @@
         <div class="icon-logo"><i class="fa-solid fa-chart-line"></i></div>
         <div>
             <h1>Quản Lý Tài Chính Sang Nguyễn</h1>
-            <p>Hệ thống theo dõi thu chi & danh mục đầu tư toàn diện</p>
+            <p>Hệ thống theo dõi thu chi & danh mục đầu tư toàn diện (Đồng bộ Firebase)</p>
         </div>
     </div>
 
@@ -319,6 +319,9 @@
 </div>
 
 <script>
+    // URL Firebase Realtime Database của bạn
+    const FIREBASE_URL = "https://sang-post-auto-default-rtdb.asia-southeast1.firebasedatabase.app/finance_data.json";
+
     // Set ngày hiện tại mặc định
     document.getElementById('trans-date').valueAsDate = new Date();
 
@@ -333,6 +336,39 @@
         }
     };
     let currentSellAsset = "";
+
+    // --- HÀM ĐỒNG BỘ FIREBASE ---
+    async function syncToFirebase() {
+        try {
+            await fetch(FIREBASE_URL, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(state)
+            });
+        } catch (error) {
+            console.error("Lỗi đồng bộ lên Firebase:", error);
+        }
+    }
+
+    async function loadFromFirebase() {
+        try {
+            let response = await fetch(FIREBASE_URL);
+            let data = await response.json();
+            if (data) {
+                state = data;
+                // Cập nhật lại giá trị input cài đặt hiển thị giao diện
+                if (state.settings) {
+                    document.getElementById('set-spend').value = state.settings.fixedSpend || 4000000;
+                    document.getElementById('set-emergency').value = state.settings.pctEmergency || 10;
+                    document.getElementById('set-education').value = state.settings.pctEducation || 10;
+                }
+            }
+            updateUI();
+        } catch (error) {
+            console.error("Lỗi tải dữ liệu từ Firebase:", error);
+            updateUI();
+        }
+    }
 
     function switchTab(tabId) {
         document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
@@ -397,6 +433,7 @@
         
         document.getElementById('trans-amount').value = '';
         updateUI();
+        syncToFirebase();
     }
 
     function executeBuy() {
@@ -417,6 +454,7 @@
         document.getElementById('buy-price').value = ''; 
         document.getElementById('buy-qty').value = '';
         updateUI();
+        syncToFirebase();
     }
 
     // --- CÀI ĐẶT TÀI SẢN ---
@@ -430,6 +468,7 @@
         document.getElementById('new-asset-name').value = '';
         document.getElementById('new-asset-price').value = '';
         updateUI();
+        syncToFirebase();
     }
 
     function deleteAssetType(asset) {
@@ -439,6 +478,7 @@
         if(confirm(`Xác nhận xóa tài sản "${asset}" khỏi hệ thống?`)) {
             delete state.portfolio[asset];
             updateUI();
+            syncToFirebase();
         }
     }
 
@@ -472,12 +512,17 @@
 
         closeSellModal();
         updateUI();
+        syncToFirebase();
         alert(`Bán thành công! Tiền thu về ${cashReceived.toLocaleString('vi-VN')} đ đã chuyển vào Cash Chưa Phân Bổ.`);
     }
 
     function changeMarketPrice(asset, inputEl) {
         let val = parseFloat(inputEl.value);
-        if(val >= 0) { state.portfolio[asset].currentPrice = val; updateUI(); }
+        if(val >= 0) { 
+            state.portfolio[asset].currentPrice = val; 
+            updateUI(); 
+            syncToFirebase();
+        }
     }
 
     function format(num) { return (num || 0).toLocaleString('vi-VN') + ' đ'; }
@@ -569,10 +614,11 @@
         state.settings.pctEmergency = parseFloat(document.getElementById('set-emergency').value) || 0;
         state.settings.pctEducation = parseFloat(document.getElementById('set-education').value) || 0;
         alert("Đã lưu cài đặt luật phân bổ.");
+        syncToFirebase();
     }
 
-    // Khởi tạo ban đầu
-    updateUI();
+    // Khởi tạo tải dữ liệu từ Firebase khi mở app
+    loadFromFirebase();
     toggleTransType();
 </script>
 
