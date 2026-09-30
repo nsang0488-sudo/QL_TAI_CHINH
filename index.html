@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản Lý Tài Chính Sang Nguyễn</title>
+    <title>Sổ Thu Chi Firebase</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
@@ -26,7 +26,7 @@
         
         /* Header Top */
         .header-top { display: flex; align-items: center; margin-bottom: 25px; }
-        .icon-logo { background: #1e3a35; color: var(--green); padding: 10px; border-radius: 8px; font-size: 20px; margin-right: 15px; }
+        .icon-logo { background: #122b25; color: var(--green); padding: 12px; border-radius: 8px; font-size: 20px; margin-right: 15px; }
         .header-top h1 { margin: 0; font-size: 20px; font-weight: 700; color: var(--text-main); }
         .header-top p { margin: 2px 0 0 0; font-size: 12px; color: var(--text-muted); }
 
@@ -46,8 +46,8 @@
         /* Stats Grid */
         .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
         .stat-card { background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 12px; padding: 15px 20px; display: flex; flex-direction: column; }
-        .stat-card .title { color: var(--text-muted); font-size: 13px; margin-bottom: 8px; display: flex; justify-content: space-between; }
-        .stat-card .amount { font-size: 24px; font-weight: 700; margin-bottom: 4px; }
+        .stat-card .title { color: var(--text-muted); font-size: 13px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;}
+        .stat-card .amount { font-size: 24px; font-weight: 700; margin-bottom: 4px; word-break: break-all; }
         .stat-card .desc { font-size: 12px; color: var(--text-muted); }
         .text-green { color: var(--green); } .text-red { color: var(--red); } .text-blue { color: var(--blue); }
 
@@ -57,7 +57,7 @@
         .form-group label { color: var(--text-muted); font-size: 12px; margin-bottom: 6px; }
         .form-group input, .form-group select { 
             background: var(--bg-input); border: 1px solid var(--border-color); color: var(--text-main); 
-            padding: 10px 12px; border-radius: 6px; font-size: 14px; outline: none;
+            padding: 10px 12px; border-radius: 6px; font-size: 14px; outline: none; width: 100%;
         }
         .form-group input:focus, .form-group select:focus { border-color: var(--blue); }
         
@@ -71,34 +71,20 @@
         .btn-danger { background: var(--red); } .btn-danger:hover { background: #dc2626; }
         .btn-sm { padding: 6px 12px; font-size: 12px; border-radius: 4px; border: none; cursor: pointer; color: white; }
 
-        /* Table */
-        table { width: 100%; border-collapse: collapse; }
+        /* Table Responsive */
+        .table-responsive { width: 100%; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; min-width: 700px; }
         th, td { padding: 12px; text-align: left; border-bottom: 1px solid var(--border-color); }
         th { color: var(--text-muted); font-weight: normal; font-size: 13px; }
         
         .tab-content { display: none; }
         .tab-content.active { display: block; }
 
-        /* Badge Percentage */
-        .badge-pct {
-            background: rgba(59, 130, 246, 0.15);
-            color: var(--blue);
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-weight: 600;
-            font-size: 12px;
-        }
-
         /* Asset List in Settings */
         .asset-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 12px;
-            background: var(--bg-input);
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            margin-bottom: 8px;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 10px 12px; background: var(--bg-input); border: 1px solid var(--border-color);
+            border-radius: 6px; margin-bottom: 8px;
         }
 
         /* Modal Chốt Lời */
@@ -106,24 +92,44 @@
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.7); align-items: center; justify-content: center; z-index: 100;
         }
-        .modal-content { background: var(--bg-panel); border: 1px solid var(--border-color); width: 400px; padding: 20px; border-radius: 12px; }
+        .modal-content { background: var(--bg-panel); border: 1px solid var(--border-color); width: 90%; max-width: 400px; padding: 20px; border-radius: 12px; }
+
+        /* ========= HIỆU CHỈNH RIÊNG CHO ĐIỆN THOẠI ========= */
+        @media (max-width: 768px) {
+            body { padding: 10px; }
+            /* Căn lại thanh Tabs */
+            .tabs { gap: 5px; }
+            .tab-btn { flex: 1; font-size: 11px; padding: 10px 5px; text-align: center; }
+            
+            /* Thẻ tiền cuộn mượt ngang */
+            .stats-grid { display: flex; overflow-x: auto; gap: 10px; padding-bottom: 5px; }
+            .stat-card { min-width: 150px; flex: 1; padding: 12px; }
+            .stat-card .amount { font-size: 20px; }
+            
+            /* Form nhập liệu tự động xuống dòng thẳng cột */
+            .form-row { flex-direction: column; gap: 12px; align-items: stretch; margin-bottom: 12px; }
+            .btn-submit { width: 100%; text-align: center; margin-top: 5px; }
+            
+            /* Cài đặt tab chia một cột thay vì 2 */
+            #tab-caidat > div { grid-template-columns: 1fr !important; }
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
     <div class="header-top">
-        <div class="icon-logo"><i class="fa-solid fa-chart-line"></i></div>
+        <div class="icon-logo"><i class="fa-solid fa-wallet"></i></div>
         <div>
-            <h1>Quản Lý Tài Chính Sang Nguyễn</h1>
-            <p>Hệ thống theo dõi thu chi & danh mục đầu tư toàn diện</p>
+            <h1>Sổ Thu Chi Firebase</h1>
+            <p>Đồng bộ dữ liệu thời gian thực</p>
         </div>
     </div>
 
     <div class="tabs">
         <button class="tab-btn active" onclick="switchTab('tab-thuchi')">Giao Dịch Hàng Ngày</button>
         <button class="tab-btn" onclick="switchTab('tab-dautu')">Quản Lý Đầu Tư</button>
-        <button class="tab-btn" onclick="switchTab('tab-caidat')">Cài Đặt Dòng Tiền & Tài Sản</button>
+        <button class="tab-btn" onclick="switchTab('tab-caidat')">Cài Đặt Dòng Tiền</button>
     </div>
 
     <!-- TAB 1: THU CHI -->
@@ -157,13 +163,6 @@
                         <option value="chi" selected>Khoản Chi (-)</option>
                     </select>
                 </div>
-                <div class="form-group flex-3" id="group-alloc-type" style="display: none;">
-                    <label>Cách Phân Bổ Thu Nhập</label>
-                    <select id="alloc-type">
-                        <option value="quy">Tự động phân bổ vào các quỹ</option>
-                        <option value="dautu">Đầu tư trực tiếp (Thẳng vào Cash)</option>
-                    </select>
-                </div>
                 <div class="form-group flex-3">
                     <label>Số Tiền (VNĐ)</label>
                     <input type="number" id="trans-amount" placeholder="0">
@@ -171,12 +170,23 @@
                 <div class="form-group flex-3">
                     <label>Danh Mục</label>
                     <select id="trans-category">
-                        <option>Ăn uống / Quán</option><option>Xăng xe</option><option>Mua sắm</option><option>Lương</option><option>Đầu tư</option>
+                        <option>Ăn uống / Quán</option><option>Xăng xe</option><option>Mua sắm</option><option>Lương</option>
                     </select>
                 </div>
                 <div class="form-group flex-2">
                     <label>Ngày Ghi Nhận</label>
                     <input type="date" id="trans-date">
+                </div>
+            </div>
+
+            <!-- Dòng mới thêm: Tùy chọn cách phân bổ -->
+            <div class="form-row" id="row-allocate" style="display: none;">
+                <div class="form-group" style="width: 100%;">
+                    <label>Lựa chọn Phân Bổ (Khi Nhập Khoản Thu)</label>
+                    <select id="allocate-method">
+                        <option value="auto">Tự động phân bổ vào các quỹ (Chi tiêu, Dự phòng, Học tập)</option>
+                        <option value="direct">Đầu tư trực tiếp (Tiền đi thẳng 100% vào Cash Chưa Phân Bổ)</option>
+                    </select>
                 </div>
             </div>
 
@@ -187,7 +197,7 @@
                 </div>
                 <div class="form-group flex-4">
                     <label>Ghi Chú / Chi Tiết</label>
-                    <input type="text" id="trans-note" placeholder="Ví dụ: Lương tháng, Thưởng, Nạp quỹ đầu tư...">
+                    <input type="text" id="trans-note" placeholder="Ví dụ: Lương tháng, Tiền xăng xe...">
                 </div>
             </div>
             <button class="btn-submit" onclick="submitTransaction()">Lưu Giao Dịch</button>
@@ -229,21 +239,22 @@
 
         <div class="panel">
             <div class="panel-header"><i class="fa-solid fa-list"></i> Danh Mục Nắm Giữ</div>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Tài Sản</th>
-                        <th>Số Lượng</th>
-                        <th>Giá Vốn TB</th>
-                        <th>Giá TT Hiện Tại</th>
-                        <th>Tổng Vốn Mua</th>
-                        <th>Tỷ Lệ % Danh Mục</th>
-                        <th>Lãi / Lỗ</th>
-                        <th>Hành Động</th>
-                    </tr>
-                </thead>
-                <tbody id="portfolio-body"></tbody>
-            </table>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Tài Sản</th>
+                            <th>Số Lượng</th>
+                            <th>Giá Vốn TB</th>
+                            <th>Giá TT Hiện Tại</th>
+                            <th>Tổng Vốn Mua</th>
+                            <th>Lãi / Lỗ</th>
+                            <th>Hành Động</th>
+                        </tr>
+                    </thead>
+                    <tbody id="portfolio-body"></tbody>
+                </table>
+            </div>
         </div>
     </div>
 
@@ -310,27 +321,89 @@
     };
     let currentSellAsset = "";
 
+    // Hàm cập nhật tất cả giao diện
+    function updateUI() {
+        document.getElementById('ui-spending').innerText = state.funds.spending.toLocaleString() + ' đ';
+        document.getElementById('ui-emergency').innerText = '+' + state.funds.emergency.toLocaleString() + ' đ';
+        document.getElementById('ui-education').innerText = '-' + state.funds.education.toLocaleString() + ' đ';
+        document.getElementById('ui-invest-cash').innerText = state.funds.investCash.toLocaleString() + ' đ';
+
+        let totalCost = 0;
+        let currentPnl = 0;
+        
+        let buyAssetSelect = document.getElementById('buy-asset');
+        let portfolioBody = document.getElementById('portfolio-body');
+        
+        // Lưu lại option đang chọn trước khi vẽ lại
+        let curSelected = buyAssetSelect.value;
+        buyAssetSelect.innerHTML = '';
+        portfolioBody.innerHTML = '';
+        
+        let assetListHtml = '';
+
+        for(let asset in state.portfolio) {
+            let p = state.portfolio[asset];
+            
+            // Đổ vào dropdown mua
+            buyAssetSelect.innerHTML += `<option value="${asset}">${asset}</option>`;
+            
+            let currentVal = p.qty * p.currentPrice;
+            totalCost += p.totalCost;
+            let pnl = currentVal - p.totalCost;
+
+            if(p.qty > 0) {
+                currentPnl += pnl;
+                let avgPrice = p.totalCost / p.qty;
+                portfolioBody.innerHTML += `
+                    <tr>
+                        <td>${asset}</td>
+                        <td>${p.qty}</td>
+                        <td>${avgPrice.toLocaleString()}</td>
+                        <td>${p.currentPrice.toLocaleString()}</td>
+                        <td>${p.totalCost.toLocaleString()}</td>
+                        <td class="${pnl >= 0 ? 'text-green' : 'text-red'}">${pnl.toLocaleString()}</td>
+                        <td><button class="btn-sm btn-danger" onclick="openSellModal('${asset}')">Bán</button></td>
+                    </tr>
+                `;
+            }
+
+            assetListHtml += `
+                <div class="asset-item">
+                    <span>${asset} (Giá TT: ${p.currentPrice.toLocaleString()})</span>
+                    <button class="btn-sm btn-danger" onclick="deleteAssetType('${asset}')"><i class="fa-solid fa-trash"></i></button>
+                </div>
+            `;
+        }
+        
+        if(state.portfolio[curSelected]) buyAssetSelect.value = curSelected;
+
+        document.getElementById('ui-invest-cost').innerText = totalCost.toLocaleString() + ' đ';
+        document.getElementById('ui-invest-pnl').innerText = currentPnl.toLocaleString() + ' đ';
+        document.getElementById('ui-invest-pnl').className = 'amount ' + (currentPnl >= 0 ? 'text-green' : 'text-red');
+        document.getElementById('asset-type-list').innerHTML = assetListHtml;
+    }
+
+    // Chạy render ban đầu
+    window.onload = function() { updateUI(); };
+
     function switchTab(tabId) {
         document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
         document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
         document.getElementById(tabId).classList.add('active');
         event.target.classList.add('active');
-        updateUI();
     }
 
     function toggleTransType() {
         let type = document.getElementById('trans-type').value;
         let btn = document.querySelector('#tab-thuchi .btn-submit');
-        let allocGroup = document.getElementById('group-alloc-type');
+        let allocateRow = document.getElementById('row-allocate');
 
         if(type === 'chi') {
-            btn.style.background = 'var(--red)'; 
-            btn.innerText = 'Lưu Giao Dịch Chi (-)';
-            allocGroup.style.display = 'none';
+            btn.style.background = 'var(--red)'; btn.innerText = 'Lưu Giao Dịch Chi (-)';
+            allocateRow.style.display = 'none'; // Ẩn phân bổ
         } else {
-            btn.style.background = 'var(--green)'; 
-            btn.innerText = 'Phân Bổ Thu Nhập (+)';
-            allocGroup.style.display = 'flex';
+            btn.style.background = 'var(--green)'; btn.innerText = 'Phân Bổ Thu Nhập (+)';
+            allocateRow.style.display = 'block'; // Hiện phân bổ
         }
     }
 
@@ -340,29 +413,29 @@
         if(!amt || amt <= 0) return alert("Nhập số tiền hợp lệ");
 
         if(type === 'thu') {
-            let allocType = document.getElementById('alloc-type').value;
-
-            if(allocType === 'dautu') {
-                // Phân bổ đầu tư trực tiếp -> Tiền đi thẳng vào Cash Chưa Phân Bổ
+            let allocateMethod = document.getElementById('allocate-method').value;
+            
+            if (allocateMethod === 'direct') {
+                // Tiền vào thẳng Cash, không chia ra các quỹ
                 state.funds.investCash += amt;
-                alert("Đã phân bổ " + format(amt) + " trực tiếp vào Cash Chưa Phân Bổ.");
+                alert("Đã chuyển toàn bộ khoản thu trực tiếp vào Cash Chưa Phân Bổ!");
             } else {
-                // Phân bổ tự động theo luật các quỹ
+                // Cơ chế tự động phân bổ
                 if(amt <= state.settings.fixedSpend) {
                     state.funds.spending += amt;
                 } else {
                     state.funds.spending += state.settings.fixedSpend;
                     let remain = amt - state.settings.fixedSpend;
                     
-                    let toEmer = (amt * state.settings.pctEmergency) / 100;
-                    let toEdu = (amt * state.settings.pctEducation) / 100;
+                    let toEmer = (remain * state.settings.pctEmergency) / 100;
+                    let toEdu = (remain * state.settings.pctEducation) / 100;
 
                     state.funds.emergency += toEmer; remain -= toEmer;
                     state.funds.education += toEdu; remain -= toEdu;
 
                     if(remain > 0) state.funds.investCash += remain;
                 }
-                alert("Đã phân bổ thu nhập thành công theo luật các quỹ.");
+                alert("Đã phân bổ thu nhập tự động thành công.");
             }
         } else {
             if(state.funds.spending < amt) {
@@ -372,6 +445,7 @@
         }
         
         document.getElementById('trans-amount').value = '';
+        document.getElementById('trans-note').value = '';
         updateUI();
     }
 
@@ -395,7 +469,14 @@
         updateUI();
     }
 
-    // --- CÀI ĐẶT TÀI SẢN ---
+    // --- CÀI ĐẶT ---
+    function saveSettings() {
+        state.settings.fixedSpend = parseFloat(document.getElementById('set-spend').value) || 0;
+        state.settings.pctEmergency = parseFloat(document.getElementById('set-emergency').value) || 0;
+        state.settings.pctEducation = parseFloat(document.getElementById('set-education').value) || 0;
+        alert("Đã cập nhật luật phân bổ!");
+    }
+
     function addAssetType() {
         let name = document.getElementById('new-asset-name').value.trim();
         let price = parseFloat(document.getElementById('new-asset-price').value) || 0;
@@ -442,115 +523,17 @@
 
         pData.qty -= qty;
         pData.totalCost -= costDeducted;
-        if(pData.qty === 0) pData.totalCost = 0;
+        if(pData.qty === 0) {
+            pData.totalCost = 0; // Fix lỗi tàn dư giá trị thập phân
+        }
 
+        // Tiền chốt lời đi vào ví investCash
         state.funds.investCash += cashReceived;
-
+        
         closeSellModal();
         updateUI();
-        alert(`Bán thành công! Tiền thu về ${cashReceived.toLocaleString('vi-VN')} đ đã chuyển vào Cash Chưa Phân Bổ.`);
+        alert("Khớp lệnh chốt lời/cắt lỗ thành công!");
     }
-
-    function changeMarketPrice(asset, inputEl) {
-        let val = parseFloat(inputEl.value);
-        if(val >= 0) { state.portfolio[asset].currentPrice = val; updateUI(); }
-    }
-
-    function format(num) { return (num || 0).toLocaleString('vi-VN') + ' đ'; }
-
-    function updateUI() {
-        // Tab Thu Chi
-        document.getElementById('ui-spending').innerText = format(state.funds.spending);
-        document.getElementById('ui-emergency').innerText = "+" + format(state.funds.emergency);
-        document.getElementById('ui-education').innerText = "+" + format(state.funds.education);
-        
-        // Tab Đầu Tư
-        document.getElementById('ui-invest-cash').innerText = format(state.funds.investCash);
-        
-        // Cập nhật Dropdown & Cài đặt Danh mục Tài sản
-        let buySelect = document.getElementById('buy-asset');
-        let currentSelected = buySelect.value;
-        buySelect.innerHTML = '';
-
-        let assetListDiv = document.getElementById('asset-type-list');
-        assetListDiv.innerHTML = '';
-
-        for(let asset in state.portfolio) {
-            // Dropdown mua
-            buySelect.innerHTML += `<option value="${asset}">${asset}</option>`;
-
-            // Danh sách trong tab Cài Đặt
-            assetListDiv.innerHTML += `
-                <div class="asset-item">
-                    <div>
-                        <b>${asset}</b>
-                        <span style="font-size:12px; color:var(--text-muted); margin-left:10px;">Giá TT: ${format(state.portfolio[asset].currentPrice)}</span>
-                    </div>
-                    <button class="btn-sm btn-danger" onclick="deleteAssetType('${asset}')"><i class="fa-solid fa-trash"></i> Xóa</button>
-                </div>
-            `;
-        }
-        if(currentSelected && state.portfolio[currentSelected]) {
-            buySelect.value = currentSelected;
-        }
-
-        // Tính tổng giá trị thị trường danh mục để tính tỷ lệ %
-        let totalVal = 0;
-        let totalCost = 0;
-
-        for(let asset in state.portfolio) {
-            let d = state.portfolio[asset];
-            if(d.qty > 0) {
-                totalCost += d.totalCost;
-                totalVal += d.qty * d.currentPrice;
-            }
-        }
-
-        // Render Bảng Danh Mục
-        let tbody = document.getElementById('portfolio-body');
-        tbody.innerHTML = '';
-
-        for(let asset in state.portfolio) {
-            let d = state.portfolio[asset];
-            if(d.qty > 0) {
-                let avg = d.totalCost / d.qty;
-                let cVal = d.qty * d.currentPrice;
-                let pnl = cVal - d.totalCost;
-                let pct = totalVal > 0 ? ((cVal / totalVal) * 100).toFixed(1) : 0;
-
-                tbody.innerHTML += `
-                    <tr>
-                        <td><b>${asset}</b></td>
-                        <td>${d.qty}</td>
-                        <td>${format(avg)}</td>
-                        <td><input type="number" style="width:110px; padding:4px; background:var(--bg-input); color:white; border:1px solid var(--border-color); border-radius:4px;" value="${d.currentPrice}" onchange="changeMarketPrice('${asset}', this)"></td>
-                        <td>${format(d.totalCost)}</td>
-                        <td><span class="badge-pct">${pct}%</span></td>
-                        <td class="${pnl >= 0 ? 'text-green' : 'text-red'}">${pnl>=0?'+':''}${format(pnl)}</td>
-                        <td><button class="btn-sm btn-danger" onclick="openSellModal('${asset}')">Chốt Lời/Cắt Lỗ</button></td>
-                    </tr>
-                `;
-            }
-        }
-        
-        document.getElementById('ui-invest-cost').innerText = format(totalCost);
-        let finalPnl = totalVal - totalCost;
-        let pnlEl = document.getElementById('ui-invest-pnl');
-        pnlEl.innerText = (finalPnl >= 0 ? '+' : '') + format(finalPnl);
-        pnlEl.className = 'amount ' + (finalPnl >= 0 ? 'text-green' : 'text-red');
-    }
-
-    function saveSettings() {
-        state.settings.fixedSpend = parseFloat(document.getElementById('set-spend').value) || 0;
-        state.settings.pctEmergency = parseFloat(document.getElementById('set-emergency').value) || 0;
-        state.settings.pctEducation = parseFloat(document.getElementById('set-education').value) || 0;
-        alert("Đã lưu cài đặt luật phân bổ.");
-    }
-
-    // Khởi tạo ban đầu
-    updateUI();
-    toggleTransType();
 </script>
-
 </body>
 </html>
