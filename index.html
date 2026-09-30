@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sổ Thu Chi & Đầu Tư</title>
+    <title>Quản Lý Tài Chính Sang Nguyễn</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
@@ -27,7 +27,7 @@
         /* Header Top */
         .header-top { display: flex; align-items: center; margin-bottom: 25px; }
         .icon-logo { background: #1e3a35; color: var(--green); padding: 10px; border-radius: 8px; font-size: 20px; margin-right: 15px; }
-        .header-top h1 { margin: 0; font-size: 18px; font-weight: 600; }
+        .header-top h1 { margin: 0; font-size: 20px; font-weight: 700; color: var(--text-main); }
         .header-top p { margin: 2px 0 0 0; font-size: 12px; color: var(--text-muted); }
 
         /* Navigation Tabs */
@@ -43,7 +43,7 @@
         .panel-header { display: flex; align-items: center; margin-bottom: 15px; font-weight: 600; color: var(--green); font-size: 15px; }
         .panel-header i { margin-right: 10px; }
 
-        /* Stats Grid - Matching Image */
+        /* Stats Grid */
         .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
         .stat-card { background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 12px; padding: 15px 20px; display: flex; flex-direction: column; }
         .stat-card .title { color: var(--text-muted); font-size: 13px; margin-bottom: 8px; display: flex; justify-content: space-between; }
@@ -51,7 +51,7 @@
         .stat-card .desc { font-size: 12px; color: var(--text-muted); }
         .text-green { color: var(--green); } .text-red { color: var(--red); } .text-blue { color: var(--blue); }
 
-        /* Form Inputs - Matching Image */
+        /* Form Inputs */
         .form-row { display: flex; gap: 15px; margin-bottom: 15px; align-items: flex-end; }
         .form-group { display: flex; flex-direction: column; width: 100%; }
         .form-group label { color: var(--text-muted); font-size: 12px; margin-bottom: 6px; }
@@ -79,6 +79,28 @@
         .tab-content { display: none; }
         .tab-content.active { display: block; }
 
+        /* Badge Percentage */
+        .badge-pct {
+            background: rgba(59, 130, 246, 0.15);
+            color: var(--blue);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 12px;
+        }
+
+        /* Asset List in Settings */
+        .asset-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 12px;
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            margin-bottom: 8px;
+        }
+
         /* Modal Chốt Lời */
         #modal-sell {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -91,20 +113,20 @@
 
 <div class="container">
     <div class="header-top">
-        <div class="icon-logo"><i class="fa-solid fa-wallet"></i></div>
+        <div class="icon-logo"><i class="fa-solid fa-chart-line"></i></div>
         <div>
-            <h1>Sổ Thu Chi Firebase</h1>
-            <p>Đồng bộ dữ liệu thời gian thực</p>
+            <h1>Quản Lý Tài Chính Sang Nguyễn</h1>
+            <p>Hệ thống theo dõi thu chi & danh mục đầu tư toàn diện</p>
         </div>
     </div>
 
     <div class="tabs">
         <button class="tab-btn active" onclick="switchTab('tab-thuchi')">Giao Dịch Hàng Ngày</button>
         <button class="tab-btn" onclick="switchTab('tab-dautu')">Quản Lý Đầu Tư</button>
-        <button class="tab-btn" onclick="switchTab('tab-caidat')">Cài Đặt Dòng Tiền</button>
+        <button class="tab-btn" onclick="switchTab('tab-caidat')">Cài Đặt Dòng Tiền & Tài Sản</button>
     </div>
 
-    <!-- TAB 1: THU CHI (GIỐNG IMAGE_2.PNG) -->
+    <!-- TAB 1: THU CHI -->
     <div id="tab-thuchi" class="tab-content active">
         <div class="stats-grid">
             <div class="stat-card">
@@ -135,6 +157,13 @@
                         <option value="chi" selected>Khoản Chi (-)</option>
                     </select>
                 </div>
+                <div class="form-group flex-3" id="group-alloc-type" style="display: none;">
+                    <label>Cách Phân Bổ Thu Nhập</label>
+                    <select id="alloc-type">
+                        <option value="quy">Tự động phân bổ vào các quỹ</option>
+                        <option value="dautu">Đầu tư trực tiếp (Thẳng vào Cash)</option>
+                    </select>
+                </div>
                 <div class="form-group flex-3">
                     <label>Số Tiền (VNĐ)</label>
                     <input type="number" id="trans-amount" placeholder="0">
@@ -142,7 +171,7 @@
                 <div class="form-group flex-3">
                     <label>Danh Mục</label>
                     <select id="trans-category">
-                        <option>Ăn uống / Quán</option><option>Xăng xe</option><option>Mua sắm</option><option>Lương</option>
+                        <option>Ăn uống / Quán</option><option>Xăng xe</option><option>Mua sắm</option><option>Lương</option><option>Đầu tư</option>
                     </select>
                 </div>
                 <div class="form-group flex-2">
@@ -158,7 +187,7 @@
                 </div>
                 <div class="form-group flex-4">
                     <label>Ghi Chú / Chi Tiết</label>
-                    <input type="text" id="trans-note" placeholder="Ví dụ: Lương tháng, Tiền xăng xe...">
+                    <input type="text" id="trans-note" placeholder="Ví dụ: Lương tháng, Thưởng, Nạp quỹ đầu tư...">
                 </div>
             </div>
             <button class="btn-submit" onclick="submitTransaction()">Lưu Giao Dịch</button>
@@ -188,10 +217,11 @@
         <div class="panel">
             <div class="panel-header"><i class="fa-solid fa-cart-plus"></i> Thực Hiện Mua Tài Sản</div>
             <div class="form-row">
-                <div class="form-group"><label>Tài Sản</label>
-                    <select id="buy-asset"><option value="Vàng">Vàng</option><option value="ETF">Cổ phiếu ETF</option><option value="CCQ">Chứng Chỉ Quỹ</option></select>
+                <div class="form-group">
+                    <label>Tài Sản</label>
+                    <select id="buy-asset"></select>
                 </div>
-                <div class="form-group"><label>Giá Mua</label><input type="number" id="buy-price"></div>
+                <div class="form-group"><label>Giá Mua (VNĐ)</label><input type="number" id="buy-price"></div>
                 <div class="form-group"><label>Số Lượng</label><input type="number" id="buy-qty"></div>
             </div>
             <button class="btn-submit" onclick="executeBuy()">Xác Nhận Mua</button>
@@ -201,7 +231,16 @@
             <div class="panel-header"><i class="fa-solid fa-list"></i> Danh Mục Nắm Giữ</div>
             <table>
                 <thead>
-                    <tr><th>Tài Sản</th><th>Số Lượng</th><th>Giá Vốn TB</th><th>Giá TT Hiện Tại</th><th>Tổng Vốn</th><th>Lãi/Lỗ</th><th>Hành Động</th></tr>
+                    <tr>
+                        <th>Tài Sản</th>
+                        <th>Số Lượng</th>
+                        <th>Giá Vốn TB</th>
+                        <th>Giá TT Hiện Tại</th>
+                        <th>Tổng Vốn Mua</th>
+                        <th>Tỷ Lệ % Danh Mục</th>
+                        <th>Lãi / Lỗ</th>
+                        <th>Hành Động</th>
+                    </tr>
                 </thead>
                 <tbody id="portfolio-body"></tbody>
             </table>
@@ -210,13 +249,33 @@
 
     <!-- TAB 3: CÀI ĐẶT -->
     <div id="tab-caidat" class="tab-content">
-        <div class="panel" style="max-width: 600px;">
-            <div class="panel-header"><i class="fa-solid fa-gear"></i> Thiết Lập Luật Phân Bổ Tự Động</div>
-            <div class="form-group"><label>Định mức Chi Tiêu / tháng (VNĐ)</label><input type="number" id="set-spend" value="4000000"></div>
-            <div class="form-group"><label>% Quỹ Dự Phòng</label><input type="number" id="set-emergency" value="10"></div>
-            <div class="form-group"><label>% Quỹ Học Tập</label><input type="number" id="set-education" value="10"></div>
-            <p style="font-size: 12px; color: var(--text-muted);">* Ghi chú: Nếu Thu Nhập < Định mức chi tiêu, toàn bộ tiền sẽ tự động dồn vào ví chi tiêu sinh tồn.</p>
-            <button class="btn-submit" onclick="saveSettings()">Lưu Thiết Lập</button>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div class="panel">
+                <div class="panel-header"><i class="fa-solid fa-gear"></i> Thiết Lập Luật Phân Bổ Tự Động</div>
+                <div class="form-group" style="margin-bottom:12px;"><label>Định mức Chi Tiêu / tháng (VNĐ)</label><input type="number" id="set-spend" value="4000000"></div>
+                <div class="form-group" style="margin-bottom:12px;"><label>% Quỹ Dự Phòng</label><input type="number" id="set-emergency" value="10"></div>
+                <div class="form-group" style="margin-bottom:12px;"><label>% Quỹ Học Tập</label><input type="number" id="set-education" value="10"></div>
+                <p style="font-size: 12px; color: var(--text-muted); margin-top: 10px;">* Ghi chú: Nếu Thu Nhập < Định mức chi tiêu, toàn bộ tiền sẽ tự động dồn vào ví chi tiêu sinh tồn.</p>
+                <button class="btn-submit" style="margin-top: 15px;" onclick="saveSettings()">Lưu Thiết Lập</button>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header"><i class="fa-solid fa-layer-group"></i> Quản Lý Danh Mục Tài Sản Đầu Tư</div>
+                <div class="form-row" style="margin-bottom: 15px;">
+                    <div class="form-group flex-3">
+                        <label>Tên Tài Sản Mới</label>
+                        <input type="text" id="new-asset-name" placeholder="Ví dụ: Bất Động Sản, Crypto...">
+                    </div>
+                    <div class="form-group flex-3">
+                        <label>Giá Thị Trường Ban Đầu</label>
+                        <input type="number" id="new-asset-price" placeholder="0">
+                    </div>
+                    <button class="btn-submit" style="margin-left: 0;" onclick="addAssetType()">Thêm</button>
+                </div>
+
+                <label style="color: var(--text-muted); font-size: 12px; display: block; margin-bottom: 10px;">Danh sách loại tài sản hiện tại:</label>
+                <div id="asset-type-list"></div>
+            </div>
         </div>
     </div>
 </div>
@@ -226,8 +285,8 @@
     <div class="modal-content">
         <div class="panel-header" style="color: var(--red);"><i class="fa-solid fa-receipt"></i> Phiếu Chốt Lời / Cắt Lỗ</div>
         <p style="font-size: 13px; color: var(--text-muted);">Tài sản: <b id="sell-modal-asset-name" style="color:white;"></b></p>
-        <div class="form-group"><label>Giá Bán Khớp Lệnh</label><input type="number" id="modal-sell-price"></div>
-        <div class="form-group"><label>Số Lượng Bán</label><input type="number" id="modal-sell-qty"></div>
+        <div class="form-group" style="margin-bottom:12px;"><label>Giá Bán Khớp Lệnh</label><input type="number" id="modal-sell-price"></div>
+        <div class="form-group" style="margin-bottom:12px;"><label>Số Lượng Bán</label><input type="number" id="modal-sell-qty"></div>
         <div style="display: flex; gap: 10px; margin-top: 20px;">
             <button class="btn-submit btn-danger" style="flex:1;" onclick="confirmSell()">Xác Nhận Bán</button>
             <button class="btn-submit" style="flex:1; background: #475569;" onclick="closeSellModal()">Hủy</button>
@@ -262,10 +321,16 @@
     function toggleTransType() {
         let type = document.getElementById('trans-type').value;
         let btn = document.querySelector('#tab-thuchi .btn-submit');
+        let allocGroup = document.getElementById('group-alloc-type');
+
         if(type === 'chi') {
-            btn.style.background = 'var(--red)'; btn.innerText = 'Lưu Giao Dịch Chi (-)';
+            btn.style.background = 'var(--red)'; 
+            btn.innerText = 'Lưu Giao Dịch Chi (-)';
+            allocGroup.style.display = 'none';
         } else {
-            btn.style.background = 'var(--green)'; btn.innerText = 'Phân Bổ Thu Nhập (+)';
+            btn.style.background = 'var(--green)'; 
+            btn.innerText = 'Phân Bổ Thu Nhập (+)';
+            allocGroup.style.display = 'flex';
         }
     }
 
@@ -275,24 +340,31 @@
         if(!amt || amt <= 0) return alert("Nhập số tiền hợp lệ");
 
         if(type === 'thu') {
-            // Logic Thu Nhập: Thiếu thì dồn hết vào chi tiêu.
-            if(amt <= state.settings.fixedSpend) {
-                state.funds.spending += amt; // Toàn bộ vào ví chi tiêu
+            let allocType = document.getElementById('alloc-type').value;
+
+            if(allocType === 'dautu') {
+                // Phân bổ đầu tư trực tiếp -> Tiền đi thẳng vào Cash Chưa Phân Bổ
+                state.funds.investCash += amt;
+                alert("Đã phân bổ " + format(amt) + " trực tiếp vào Cash Chưa Phân Bổ.");
             } else {
-                state.funds.spending += state.settings.fixedSpend;
-                let remain = amt - state.settings.fixedSpend;
-                
-                let toEmer = (amt * state.settings.pctEmergency) / 100;
-                let toEdu = (amt * state.settings.pctEducation) / 100;
+                // Phân bổ tự động theo luật các quỹ
+                if(amt <= state.settings.fixedSpend) {
+                    state.funds.spending += amt;
+                } else {
+                    state.funds.spending += state.settings.fixedSpend;
+                    let remain = amt - state.settings.fixedSpend;
+                    
+                    let toEmer = (amt * state.settings.pctEmergency) / 100;
+                    let toEdu = (amt * state.settings.pctEducation) / 100;
 
-                state.funds.emergency += toEmer; remain -= toEmer;
-                state.funds.education += toEdu; remain -= toEdu;
+                    state.funds.emergency += toEmer; remain -= toEmer;
+                    state.funds.education += toEdu; remain -= toEdu;
 
-                if(remain > 0) state.funds.investCash += remain;
+                    if(remain > 0) state.funds.investCash += remain;
+                }
+                alert("Đã phân bổ thu nhập thành công theo luật các quỹ.");
             }
-            alert("Đã phân bổ thu nhập theo logic Cài Đặt.");
         } else {
-            // Logic Chi Tiêu: Trừ thẳng ví, tiền dư tự động cộng dồn vì ta không reset state.funds.spending
             if(state.funds.spending < amt) {
                 if(!confirm("Ví chi tiêu đang âm, tiếp tục trừ?")) return;
             }
@@ -305,11 +377,12 @@
 
     function executeBuy() {
         let asset = document.getElementById('buy-asset').value;
+        if(!asset) return alert("Vui lòng chọn loại tài sản!");
         let price = parseFloat(document.getElementById('buy-price').value);
         let qty = parseFloat(document.getElementById('buy-qty').value);
         
         let total = price * qty;
-        if(!price || !qty) return;
+        if(!price || !qty) return alert("Vui lòng nhập đầy đủ giá và số lượng!");
         if(state.funds.investCash < total) return alert("Cash chưa phân bổ không đủ!");
 
         state.funds.investCash -= total;
@@ -317,8 +390,32 @@
         state.portfolio[asset].totalCost += total;
         state.portfolio[asset].currentPrice = price;
         
-        document.getElementById('buy-price').value = ''; document.getElementById('buy-qty').value = '';
+        document.getElementById('buy-price').value = ''; 
+        document.getElementById('buy-qty').value = '';
         updateUI();
+    }
+
+    // --- CÀI ĐẶT TÀI SẢN ---
+    function addAssetType() {
+        let name = document.getElementById('new-asset-name').value.trim();
+        let price = parseFloat(document.getElementById('new-asset-price').value) || 0;
+        if(!name) return alert("Vui lòng nhập tên tài sản mới");
+        if(state.portfolio[name]) return alert("Loại tài sản này đã tồn tại!");
+
+        state.portfolio[name] = { qty: 0, totalCost: 0, currentPrice: price };
+        document.getElementById('new-asset-name').value = '';
+        document.getElementById('new-asset-price').value = '';
+        updateUI();
+    }
+
+    function deleteAssetType(asset) {
+        if(state.portfolio[asset].qty > 0) {
+            return alert(`Không thể xóa "${asset}" vì đang có số lượng nắm giữ > 0!`);
+        }
+        if(confirm(`Xác nhận xóa tài sản "${asset}" khỏi hệ thống?`)) {
+            delete state.portfolio[asset];
+            updateUI();
+        }
     }
 
     // --- LOGIC PHIẾU CHỐT LỜI ---
@@ -335,7 +432,7 @@
         let price = parseFloat(document.getElementById('modal-sell-price').value);
         let qty = parseFloat(document.getElementById('modal-sell-qty').value);
         
-        if(!price || !qty) return;
+        if(!price || !qty) return alert("Vui lòng nhập giá và số lượng bán!");
         let pData = state.portfolio[currentSellAsset];
         if(qty > pData.qty) return alert("Không đủ số lượng để bán!");
 
@@ -343,12 +440,10 @@
         let costDeducted = avgCost * qty;
         let cashReceived = price * qty;
 
-        // Trừ tài sản
         pData.qty -= qty;
         pData.totalCost -= costDeducted;
         if(pData.qty === 0) pData.totalCost = 0;
 
-        // TIỀN BÁN VỀ LẠI DANH MỤC ĐẦU TƯ CHƯA PHÂN BỔ
         state.funds.investCash += cashReceived;
 
         closeSellModal();
@@ -358,10 +453,10 @@
 
     function changeMarketPrice(asset, inputEl) {
         let val = parseFloat(inputEl.value);
-        if(val > 0) { state.portfolio[asset].currentPrice = val; updateUI(); }
+        if(val >= 0) { state.portfolio[asset].currentPrice = val; updateUI(); }
     }
 
-    function format(num) { return num.toLocaleString('vi-VN') + ' đ'; }
+    function format(num) { return (num || 0).toLocaleString('vi-VN') + ' đ'; }
 
     function updateUI() {
         // Tab Thu Chi
@@ -372,9 +467,48 @@
         // Tab Đầu Tư
         document.getElementById('ui-invest-cash').innerText = format(state.funds.investCash);
         
+        // Cập nhật Dropdown & Cài đặt Danh mục Tài sản
+        let buySelect = document.getElementById('buy-asset');
+        let currentSelected = buySelect.value;
+        buySelect.innerHTML = '';
+
+        let assetListDiv = document.getElementById('asset-type-list');
+        assetListDiv.innerHTML = '';
+
+        for(let asset in state.portfolio) {
+            // Dropdown mua
+            buySelect.innerHTML += `<option value="${asset}">${asset}</option>`;
+
+            // Danh sách trong tab Cài Đặt
+            assetListDiv.innerHTML += `
+                <div class="asset-item">
+                    <div>
+                        <b>${asset}</b>
+                        <span style="font-size:12px; color:var(--text-muted); margin-left:10px;">Giá TT: ${format(state.portfolio[asset].currentPrice)}</span>
+                    </div>
+                    <button class="btn-sm btn-danger" onclick="deleteAssetType('${asset}')"><i class="fa-solid fa-trash"></i> Xóa</button>
+                </div>
+            `;
+        }
+        if(currentSelected && state.portfolio[currentSelected]) {
+            buySelect.value = currentSelected;
+        }
+
+        // Tính tổng giá trị thị trường danh mục để tính tỷ lệ %
+        let totalVal = 0;
+        let totalCost = 0;
+
+        for(let asset in state.portfolio) {
+            let d = state.portfolio[asset];
+            if(d.qty > 0) {
+                totalCost += d.totalCost;
+                totalVal += d.qty * d.currentPrice;
+            }
+        }
+
+        // Render Bảng Danh Mục
         let tbody = document.getElementById('portfolio-body');
         tbody.innerHTML = '';
-        let totalCost = 0, totalVal = 0;
 
         for(let asset in state.portfolio) {
             let d = state.portfolio[asset];
@@ -382,14 +516,16 @@
                 let avg = d.totalCost / d.qty;
                 let cVal = d.qty * d.currentPrice;
                 let pnl = cVal - d.totalCost;
-                
-                totalCost += d.totalCost; totalVal += cVal;
+                let pct = totalVal > 0 ? ((cVal / totalVal) * 100).toFixed(1) : 0;
 
                 tbody.innerHTML += `
                     <tr>
-                        <td><b>${asset}</b></td><td>${d.qty}</td><td>${format(avg)}</td>
-                        <td><input type="number" style="width:100px; padding:4px; background:var(--bg-input); color:white; border:1px solid var(--border-color);" value="${d.currentPrice}" onchange="changeMarketPrice('${asset}', this)"></td>
+                        <td><b>${asset}</b></td>
+                        <td>${d.qty}</td>
+                        <td>${format(avg)}</td>
+                        <td><input type="number" style="width:110px; padding:4px; background:var(--bg-input); color:white; border:1px solid var(--border-color); border-radius:4px;" value="${d.currentPrice}" onchange="changeMarketPrice('${asset}', this)"></td>
                         <td>${format(d.totalCost)}</td>
+                        <td><span class="badge-pct">${pct}%</span></td>
                         <td class="${pnl >= 0 ? 'text-green' : 'text-red'}">${pnl>=0?'+':''}${format(pnl)}</td>
                         <td><button class="btn-sm btn-danger" onclick="openSellModal('${asset}')">Chốt Lời/Cắt Lỗ</button></td>
                     </tr>
@@ -405,13 +541,13 @@
     }
 
     function saveSettings() {
-        state.settings.fixedSpend = parseFloat(document.getElementById('set-spend').value);
-        state.settings.pctEmergency = parseFloat(document.getElementById('set-emergency').value);
-        state.settings.pctEducation = parseFloat(document.getElementById('set-education').value);
-        alert("Đã lưu cài đặt.");
+        state.settings.fixedSpend = parseFloat(document.getElementById('set-spend').value) || 0;
+        state.settings.pctEmergency = parseFloat(document.getElementById('set-emergency').value) || 0;
+        state.settings.pctEducation = parseFloat(document.getElementById('set-education').value) || 0;
+        alert("Đã lưu cài đặt luật phân bổ.");
     }
 
-    // Khởi tạo
+    // Khởi tạo ban đầu
     updateUI();
     toggleTransType();
 </script>
