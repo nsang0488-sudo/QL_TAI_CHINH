@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quản Lý Tài Chính Sang Nguyễn</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Thư viện Chart.js để vẽ biểu đồ -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
             --bg-body: #0b1121;
@@ -16,6 +18,7 @@
             --green: #10b981;
             --red: #ef4444;
             --blue: #3b82f6;
+            --yellow: #eab308;
         }
 
         * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
@@ -43,13 +46,17 @@
         .panel-header { display: flex; align-items: center; margin-bottom: 15px; font-weight: 600; color: var(--green); font-size: 15px; }
         .panel-header i { margin-right: 10px; }
 
-        /* Stats Grid */
-        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
+        /* Stats Grid - Nâng cấp tự động cân đối cho 5 ô */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
         .stat-card { background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 12px; padding: 15px 20px; display: flex; flex-direction: column; }
         .stat-card .title { color: var(--text-muted); font-size: 13px; margin-bottom: 8px; display: flex; justify-content: space-between; }
-        .stat-card .amount { font-size: 24px; font-weight: 700; margin-bottom: 4px; }
+        .stat-card .amount { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
         .stat-card .desc { font-size: 12px; color: var(--text-muted); }
-        .text-green { color: var(--green); } .text-red { color: var(--red); } .text-blue { color: var(--blue); }
+        .text-green { color: var(--green); } .text-red { color: var(--red); } .text-blue { color: var(--blue); } .text-yellow { color: var(--yellow); }
+
+        /* Chart Layout */
+        .chart-container { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .chart-box { background: var(--bg-input); padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); }
 
         /* Form Inputs */
         .form-row { display: flex; gap: 15px; margin-bottom: 15px; align-items: flex-end; }
@@ -73,7 +80,7 @@
 
         /* Table Responsive Wrapper */
         .table-responsive { width: 100%; overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; min-width: 700px; }
+        table { width: 100%; border-collapse: collapse; min-width: 900px; }
         th, td { padding: 12px; text-align: left; border-bottom: 1px solid var(--border-color); }
         th { color: var(--text-muted); font-weight: normal; font-size: 13px; }
         
@@ -81,53 +88,27 @@
         .tab-content.active { display: block; }
 
         /* Badge Percentage */
-        .badge-pct {
-            background: rgba(59, 130, 246, 0.15);
-            color: var(--blue);
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-weight: 600;
-            font-size: 12px;
-        }
+        .badge-pct { background: rgba(59, 130, 246, 0.15); color: var(--blue); padding: 4px 8px; border-radius: 4px; font-weight: 600; font-size: 12px; }
 
         /* Asset List in Settings */
-        .asset-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 12px;
-            background: var(--bg-input);
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            margin-bottom: 8px;
-        }
+        .asset-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; background: var(--bg-input); border: 1px solid var(--border-color); border-radius: 6px; margin-bottom: 8px; }
 
         /* Modal Chốt Lời */
-        #modal-sell {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.7); align-items: center; justify-content: center; z-index: 100; padding: 15px;
-        }
+        #modal-sell { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); align-items: center; justify-content: center; z-index: 100; padding: 15px; }
         .modal-content { background: var(--bg-panel); border: 1px solid var(--border-color); width: 100%; max-width: 400px; padding: 20px; border-radius: 12px; }
 
-        /* ========= TỐI ƯU GIAO DIỆN ĐIỆN THOẠI (MOBILE RESPONSIVE) ========= */
+        /* ========= TỐI ƯU GIAO DIỆN ĐIỆN THOẠI ========= */
         @media (max-width: 768px) {
             body { padding: 10px; }
-            
-            /* Tabs co giãn đều trên màn hình nhỏ */
             .tabs { gap: 5px; }
             .tab-btn { flex: 1; font-size: 11px; padding: 10px 6px; text-align: center; }
-            
-            /* Thanh số dư vuốt ngang mượt mà trên mobile */
-            .stats-grid { display: flex; overflow-x: auto; gap: 10px; padding-bottom: 5px; }
-            .stat-card { min-width: 160px; flex: 1; padding: 12px; }
-            .stat-card .amount { font-size: 20px; }
-            
-            /* Form nhập liệu tự động xếp dọc (stack) tránh bị bóp méo */
+            .stats-grid { display: flex; overflow-x: auto; gap: 10px; padding-bottom: 5px; scroll-snap-type: x mandatory; }
+            .stat-card { min-width: 200px; flex: 1; padding: 12px; scroll-snap-align: start; }
+            .stat-card .amount { font-size: 18px; }
             .form-row { flex-direction: column; gap: 12px; align-items: stretch; margin-bottom: 12px; }
             .btn-submit { width: 100%; text-align: center; margin-top: 5px; }
-
-            /* Tab Cài đặt đưa thành 1 cột */
             #tab-caidat > div { grid-template-columns: 1fr !important; }
+            .chart-container { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -218,6 +199,7 @@
 
     <!-- TAB 2: ĐẦU TƯ -->
     <div id="tab-dautu" class="tab-content">
+        <!-- Đã thêm 2 ô Tổng tài sản và Lãi/Lỗ Chưa Chốt -->
         <div class="stats-grid">
             <div class="stat-card">
                 <div class="title">Cash Chưa Phân Bổ <i class="fa-solid fa-coins text-green"></i></div>
@@ -230,9 +212,38 @@
                 <div class="desc">Giá trị gốc đã mua</div>
             </div>
             <div class="stat-card">
-                <div class="title">Lãi/Lỗ Danh Mục <i class="fa-solid fa-arrow-trend-up text-main"></i></div>
+                <div class="title">Tổng Tài Sản (Gốc) <i class="fa-solid fa-vault text-main"></i></div>
+                <div class="amount text-main" id="ui-total-base">0 đ</div>
+                <div class="desc">Cash + Vốn đầu tư</div>
+            </div>
+            <div class="stat-card">
+                <div class="title">Lãi/Lỗ Danh Mục <i class="fa-solid fa-arrow-trend-up text-yellow"></i></div>
                 <div class="amount" id="ui-invest-pnl">0 đ</div>
                 <div class="desc">Dựa trên giá cập nhật</div>
+            </div>
+            <div class="stat-card" style="border-color: var(--green); background: rgba(16, 185, 129, 0.05);">
+                <div class="title">Lãi Lỗ Chưa Chốt <i class="fa-solid fa-sack-dollar text-green"></i></div>
+                <div class="amount text-green" id="ui-total-real">0 đ</div>
+                <div class="desc">Tổng Tài Sản (Gồm Lãi/Lỗ)</div>
+            </div>
+        </div>
+
+        <!-- Panel Biểu Đồ Mới -->
+        <div class="panel">
+            <div class="panel-header"><i class="fa-solid fa-chart-area"></i> Biểu Đồ Thống Kê & Biến Động</div>
+            <div class="chart-container">
+                <div class="chart-box">
+                    <h4 style="text-align:center; color: var(--text-muted); margin: 0 0 10px 0; font-size: 13px;">Lịch sử Tổng Tài Sản & Lãi/Lỗ (VNĐ)</h4>
+                    <div style="position: relative; height: 250px; width: 100%;">
+                        <canvas id="historyChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-box">
+                    <h4 style="text-align:center; color: var(--text-muted); margin: 0 0 10px 0; font-size: 13px;">Chi Tiết Lãi/Lỗ Từng Tài Sản (%)</h4>
+                    <div style="position: relative; height: 250px; width: 100%;">
+                        <canvas id="assetsChart"></canvas>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -260,8 +271,8 @@
                             <th>Giá Vốn TB</th>
                             <th>Giá TT Hiện Tại</th>
                             <th>Tổng Vốn Mua</th>
-                            <th>Tỷ Lệ % Danh Mục</th>
-                            <th>Lãi / Lỗ</th>
+                            <th>Tỷ Lệ % DM</th>
+                            <th>Lãi / Lỗ (Tiền & %)</th>
                             <th>Hành Động</th>
                         </tr>
                     </thead>
@@ -319,13 +330,16 @@
 </div>
 
 <script>
-    // URL Firebase Realtime Database của bạn
     const FIREBASE_URL = "https://sang-post-auto-default-rtdb.asia-southeast1.firebasedatabase.app/finance_data.json";
-
-    // Set ngày hiện tại mặc định
     document.getElementById('trans-date').valueAsDate = new Date();
 
-    // STATE HỆ THỐNG
+    // Thiết lập màu chữ cơ bản cho Chart.js nền tối
+    Chart.defaults.color = '#8493a8';
+    Chart.defaults.borderColor = '#27344f';
+
+    let historyChartInstance = null;
+    let assetsChartInstance = null;
+
     let state = {
         settings: { fixedSpend: 4000000, pctEmergency: 10, pctEducation: 10 },
         funds: { spending: 0, emergency: 0, education: 0, investCash: 0 },
@@ -333,11 +347,11 @@
             "Vàng": { qty: 0, totalCost: 0, currentPrice: 8000000 },
             "ETF": { qty: 0, totalCost: 0, currentPrice: 20000 },
             "CCQ": { qty: 0, totalCost: 0, currentPrice: 15000 }
-        }
+        },
+        history: {} // Ghi lại biến động theo ngày
     };
     let currentSellAsset = "";
 
-    // --- HÀM ĐỒNG BỘ FIREBASE ---
     async function syncToFirebase() {
         try {
             await fetch(FIREBASE_URL, {
@@ -356,7 +370,7 @@
             let data = await response.json();
             if (data) {
                 state = data;
-                // Cập nhật lại giá trị input cài đặt hiển thị giao diện
+                if(!state.history) state.history = {}; // Hỗ trợ dữ liệu cũ chưa có history
                 if (state.settings) {
                     document.getElementById('set-spend').value = state.settings.fixedSpend || 4000000;
                     document.getElementById('set-emergency').value = state.settings.pctEmergency || 10;
@@ -403,11 +417,9 @@
             let allocType = document.getElementById('alloc-type').value;
 
             if(allocType === 'dautu') {
-                // Phân bổ đầu tư trực tiếp -> Tiền đi thẳng vào Cash Chưa Phân Bổ
                 state.funds.investCash += amt;
                 alert("Đã phân bổ " + format(amt) + " trực tiếp vào Cash Chưa Phân Bổ.");
             } else {
-                // Phân bổ tự động theo luật các quỹ
                 if(amt <= state.settings.fixedSpend) {
                     state.funds.spending += amt;
                 } else {
@@ -457,7 +469,6 @@
         syncToFirebase();
     }
 
-    // --- CÀI ĐẶT TÀI SẢN ---
     function addAssetType() {
         let name = document.getElementById('new-asset-name').value.trim();
         let price = parseFloat(document.getElementById('new-asset-price').value) || 0;
@@ -482,7 +493,6 @@
         }
     }
 
-    // --- LOGIC PHIẾU CHỐT LỜI ---
     function openSellModal(asset) {
         currentSellAsset = asset;
         document.getElementById('sell-modal-asset-name').innerText = asset;
@@ -527,16 +537,112 @@
 
     function format(num) { return (num || 0).toLocaleString('vi-VN') + ' đ'; }
 
+    // HÀM VẼ BIỂU ĐỒ MỚI 
+    function renderCharts(baseAssets, realAssets, finalPnl) {
+        let today = new Date().toISOString().split('T')[0];
+        
+        // Ghi lại Snapshot của ngày hôm nay vào lịch sử (sẽ ghi đè nếu thay đổi nhiều lần trong ngày để ra mốc cuối)
+        state.history[today] = { totalReal: realAssets, pnl: finalPnl };
+
+        // 1. Dữ liệu cho biểu đồ đường (Line Chart - Biến động)
+        let labelsHistory = Object.keys(state.history).sort();
+        let dataTotal = labelsHistory.map(date => state.history[date].totalReal);
+        let dataPnl = labelsHistory.map(date => state.history[date].pnl);
+
+        const ctxHistory = document.getElementById('historyChart').getContext('2d');
+        if (historyChartInstance) historyChartInstance.destroy();
+        
+        historyChartInstance = new Chart(ctxHistory, {
+            type: 'line',
+            data: {
+                labels: labelsHistory,
+                datasets: [
+                    {
+                        label: 'Tổng Tài Sản Thực Tế',
+                        data: dataTotal,
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        fill: true,
+                        yAxisID: 'y',
+                        tension: 0.3
+                    },
+                    {
+                        label: 'Lãi/Lỗ Danh Mục',
+                        data: dataPnl,
+                        borderColor: dataPnl[dataPnl.length-1] >= 0 ? '#10b981' : '#ef4444',
+                        backgroundColor: dataPnl[dataPnl.length-1] >= 0 ? '#10b981' : '#ef4444',
+                        type: 'bar',
+                        yAxisID: 'y1',
+                        borderRadius: 4
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: { type: 'linear', display: true, position: 'left', title: {display: true, text: 'Tổng TS (VNĐ)'} },
+                    y1: { type: 'linear', display: false, position: 'right', grid: { drawOnChartArea: false } }
+                }
+            }
+        });
+
+        // 2. Dữ liệu cho biểu đồ cột (Bar Chart - Từng tài sản)
+        let labelsAssets = [];
+        let dataAssetPnl = [];
+        let dataAssetPct = [];
+        let bgColors = [];
+
+        for(let asset in state.portfolio) {
+            let d = state.portfolio[asset];
+            if(d.qty > 0) {
+                labelsAssets.push(asset);
+                let pnl = (d.qty * d.currentPrice) - d.totalCost;
+                let pct = d.totalCost > 0 ? (pnl / d.totalCost) * 100 : 0;
+                dataAssetPnl.push(pnl);
+                dataAssetPct.push(pct.toFixed(2));
+                bgColors.push(pnl >= 0 ? '#10b981' : '#ef4444');
+            }
+        }
+
+        const ctxAssets = document.getElementById('assetsChart').getContext('2d');
+        if (assetsChartInstance) assetsChartInstance.destroy();
+        
+        assetsChartInstance = new Chart(ctxAssets, {
+            type: 'bar',
+            data: {
+                labels: labelsAssets,
+                datasets: [{
+                    label: 'Lãi / Lỗ Hiện Tại',
+                    data: dataAssetPnl,
+                    backgroundColor: bgColors,
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let val = context.raw;
+                                let pct = dataAssetPct[context.dataIndex];
+                                return `Lãi/Lỗ: ${val.toLocaleString('vi-VN')} đ (${pct >= 0 ? '+' : ''}${pct}%)`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
     function updateUI() {
-        // Tab Thu Chi
         document.getElementById('ui-spending').innerText = format(state.funds.spending);
         document.getElementById('ui-emergency').innerText = "+" + format(state.funds.emergency);
         document.getElementById('ui-education').innerText = "+" + format(state.funds.education);
-        
-        // Tab Đầu Tư
         document.getElementById('ui-invest-cash').innerText = format(state.funds.investCash);
         
-        // Cập nhật Dropdown & Cài đặt Danh mục Tài sản
         let buySelect = document.getElementById('buy-asset');
         let currentSelected = buySelect.value;
         buySelect.innerHTML = '';
@@ -545,10 +651,7 @@
         assetListDiv.innerHTML = '';
 
         for(let asset in state.portfolio) {
-            // Dropdown mua
             buySelect.innerHTML += `<option value="${asset}">${asset}</option>`;
-
-            // Danh sách trong tab Cài Đặt
             assetListDiv.innerHTML += `
                 <div class="asset-item">
                     <div>
@@ -563,9 +666,11 @@
             buySelect.value = currentSelected;
         }
 
-        // Tính tổng giá trị thị trường danh mục để tính tỷ lệ %
         let totalVal = 0;
         let totalCost = 0;
+
+        let tbody = document.getElementById('portfolio-body');
+        tbody.innerHTML = '';
 
         for(let asset in state.portfolio) {
             let d = state.portfolio[asset];
@@ -575,17 +680,17 @@
             }
         }
 
-        // Render Bảng Danh Mục
-        let tbody = document.getElementById('portfolio-body');
-        tbody.innerHTML = '';
-
         for(let asset in state.portfolio) {
             let d = state.portfolio[asset];
             if(d.qty > 0) {
                 let avg = d.totalCost / d.qty;
                 let cVal = d.qty * d.currentPrice;
                 let pnl = cVal - d.totalCost;
-                let pct = totalVal > 0 ? ((cVal / totalVal) * 100).toFixed(1) : 0;
+                let pctInPort = totalVal > 0 ? ((cVal / totalVal) * 100).toFixed(1) : 0;
+                
+                // Tính phần trăm Lãi/Lỗ của riêng tài sản này
+                let pnlPct = d.totalCost > 0 ? ((pnl / d.totalCost) * 100).toFixed(2) : 0;
+                let pnlText = `${pnl>=0?'+':''}${format(pnl)} (${pnl>=0?'+':''}${pnlPct}%)`;
 
                 tbody.innerHTML += `
                     <tr>
@@ -594,19 +699,32 @@
                         <td>${format(avg)}</td>
                         <td><input type="number" style="width:110px; padding:4px; background:var(--bg-input); color:white; border:1px solid var(--border-color); border-radius:4px;" value="${d.currentPrice}" onchange="changeMarketPrice('${asset}', this)"></td>
                         <td>${format(d.totalCost)}</td>
-                        <td><span class="badge-pct">${pct}%</span></td>
-                        <td class="${pnl >= 0 ? 'text-green' : 'text-red'}">${pnl>=0?'+':''}${format(pnl)}</td>
+                        <td><span class="badge-pct">${pctInPort}%</span></td>
+                        <td class="${pnl >= 0 ? 'text-green' : 'text-red'}"><b>${pnlText}</b></td>
                         <td><button class="btn-sm btn-danger" onclick="openSellModal('${asset}')">Chốt Lời/Cắt Lỗ</button></td>
                     </tr>
                 `;
             }
         }
         
-        document.getElementById('ui-invest-cost').innerText = format(totalCost);
         let finalPnl = totalVal - totalCost;
+        let baseAssets = state.funds.investCash + totalCost;
+        let realAssets = state.funds.investCash + totalVal;
+
+        // Cập nhật các ô Thống kê mới 
+        document.getElementById('ui-invest-cost').innerText = format(totalCost);
+        document.getElementById('ui-total-base').innerText = format(baseAssets);
+        
         let pnlEl = document.getElementById('ui-invest-pnl');
         pnlEl.innerText = (finalPnl >= 0 ? '+' : '') + format(finalPnl);
         pnlEl.className = 'amount ' + (finalPnl >= 0 ? 'text-green' : 'text-red');
+
+        let totalRealEl = document.getElementById('ui-total-real');
+        totalRealEl.innerText = format(realAssets);
+        totalRealEl.className = 'amount ' + (realAssets >= baseAssets ? 'text-green' : 'text-red');
+
+        // Render Biểu đồ thống kê tự động
+        renderCharts(baseAssets, realAssets, finalPnl);
     }
 
     function saveSettings() {
@@ -617,7 +735,6 @@
         syncToFirebase();
     }
 
-    // Khởi tạo tải dữ liệu từ Firebase khi mở app
     loadFromFirebase();
     toggleTransType();
 </script>
