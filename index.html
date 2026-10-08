@@ -22,11 +22,11 @@
         }
 
         * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        
+
         body { background-color: var(--bg-body); color: var(--text-main); margin: 0; padding: 20px; font-size: 14px; }
-        
+
         .container { max-width: 1200px; margin: 0 auto; }
-        
+
         /* Header Top */
         .header-top { display: flex; align-items: center; margin-bottom: 25px; }
         .icon-logo { background: #1e3a35; color: var(--green); padding: 10px; border-radius: 8px; font-size: 20px; margin-right: 15px; }
@@ -35,8 +35,8 @@
 
         /* Navigation Tabs */
         .tabs { display: flex; gap: 10px; margin-bottom: 20px; }
-        .tab-btn { 
-            background: var(--bg-panel); border: 1px solid var(--border-color); color: var(--text-muted); 
+        .tab-btn {
+            background: var(--bg-panel); border: 1px solid var(--border-color); color: var(--text-muted);
             padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.2s;
         }
         .tab-btn.active { color: var(--green); border-color: var(--green); background: rgba(16, 185, 129, 0.1); }
@@ -62,16 +62,16 @@
         .form-row { display: flex; gap: 15px; margin-bottom: 15px; align-items: flex-end; }
         .form-group { display: flex; flex-direction: column; width: 100%; }
         .form-group label { color: var(--text-muted); font-size: 12px; margin-bottom: 6px; }
-        .form-group input, .form-group select { 
-            background: var(--bg-input); border: 1px solid var(--border-color); color: var(--text-main); 
+        .form-group input, .form-group select {
+            background: var(--bg-input); border: 1px solid var(--border-color); color: var(--text-main);
             padding: 10px 12px; border-radius: 6px; font-size: 14px; outline: none; width: 100%;
         }
         .form-group input:focus, .form-group select:focus { border-color: var(--blue); }
-        
+
         .flex-2 { flex: 2; } .flex-3 { flex: 3; } .flex-4 { flex: 4; }
 
-        .btn-submit { 
-            background: var(--green); color: white; border: none; padding: 10px 20px; 
+        .btn-submit {
+            background: var(--green); color: white; border: none; padding: 10px 20px;
             border-radius: 6px; font-weight: 600; cursor: pointer; align-self: flex-end; margin-left: auto; display: block;
         }
         .btn-submit:hover { background: #0ea5e9; }
@@ -83,7 +83,7 @@
         table { width: 100%; border-collapse: collapse; min-width: 900px; }
         th, td { padding: 12px; text-align: left; border-bottom: 1px solid var(--border-color); }
         th { color: var(--text-muted); font-weight: normal; font-size: 13px; }
-        
+
         .tab-content { display: none; }
         .tab-content.active { display: block; }
 
@@ -151,7 +151,7 @@
 
         <div class="panel">
             <div class="panel-header"><i class="fa-solid fa-plus-circle"></i> Thêm Giao Dịch Mới</div>
-            
+
             <div class="form-row">
                 <div class="form-group flex-2">
                     <label>Loại Giao Dịch</label>
@@ -186,14 +186,33 @@
             <div class="form-row">
                 <div class="form-group flex-3">
                     <label>Phương Thức</label>
-                    <select><option>Chuyển khoản (CK)</option><option>Tiền mặt</option></select>
+                    <select id="trans-method"><option>Chuyển khoản (CK)</option><option>Tiền mặt</option></select>
                 </div>
                 <div class="form-group flex-4">
-                    <label>Ghi Chú / Chi Tiết</label>
-                    <input type="text" id="trans-note" placeholder="Ví dụ: Lương tháng, Thưởng, Nạp quỹ đầu tư...">
+                    <label>Ghi Chú / Chi Tiết / Lý Do</label>
+                    <input type="text" id="trans-note" placeholder="Ví dụ: Ăn trưa, Đổ xăng, Lương tháng...">
                 </div>
             </div>
             <button class="btn-submit" onclick="submitTransaction()">Lưu Giao Dịch</button>
+        </div>
+
+        <div class="panel">
+            <div class="panel-header"><i class="fa-solid fa-list-check"></i> Bảng Ghi Nhận Phiếu Chi Chi Tiết</div>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Ngày Tháng</th>
+                            <th>Danh Mục</th>
+                            <th>Lý Do / Chi Tiết</th>
+                            <th>Phương Thức</th>
+                            <th>Số Tiền Chi</th>
+                            <th>Thao Tác</th>
+                        </tr>
+                    </thead>
+                    <tbody id="expense-list-body"></tbody>
+                </table>
+            </div>
         </div>
     </div>
 
@@ -348,6 +367,7 @@
             "ETF": { qty: 0, totalCost: 0, currentPrice: 20000 },
             "CCQ": { qty: 0, totalCost: 0, currentPrice: 15000 }
         },
+        expenses: [], // Danh sách các phiếu chi tiết
         history: {} // Ghi lại biến động theo ngày
     };
     let currentSellAsset = "";
@@ -370,6 +390,7 @@
             let data = await response.json();
             if (data) {
                 state = data;
+                if(!state.expenses) state.expenses = [];
                 if(!state.history) state.history = {}; // Hỗ trợ dữ liệu cũ chưa có history
                 if (state.settings) {
                     document.getElementById('set-spend').value = state.settings.fixedSpend || 4000000;
@@ -398,11 +419,11 @@
         let allocGroup = document.getElementById('group-alloc-type');
 
         if(type === 'chi') {
-            btn.style.background = 'var(--red)'; 
+            btn.style.background = 'var(--red)';
             btn.innerText = 'Lưu Giao Dịch Chi (-)';
             allocGroup.style.display = 'none';
         } else {
-            btn.style.background = 'var(--green)'; 
+            btn.style.background = 'var(--green)';
             btn.innerText = 'Phân Bổ Thu Nhập (+)';
             allocGroup.style.display = 'flex';
         }
@@ -425,7 +446,7 @@
                 } else {
                     state.funds.spending += state.settings.fixedSpend;
                     let remain = amt - state.settings.fixedSpend;
-                    
+
                     let toEmer = (amt * state.settings.pctEmergency) / 100;
                     let toEdu = (amt * state.settings.pctEducation) / 100;
 
@@ -441,11 +462,43 @@
                 if(!confirm("Ví chi tiêu đang âm, tiếp tục trừ?")) return;
             }
             state.funds.spending -= amt;
+
+            let category = document.getElementById('trans-category').value;
+            let date = document.getElementById('trans-date').value || new Date().toISOString().split('T')[0];
+            let method = document.getElementById('trans-method').value;
+            let note = document.getElementById('trans-note').value.trim() || category;
+
+            let expenseRecord = {
+                id: Date.now(),
+                date: date,
+                category: category,
+                note: note,
+                amount: amt,
+                method: method
+            };
+
+            if(!state.expenses) state.expenses = [];
+            state.expenses.unshift(expenseRecord);
         }
-        
+
         document.getElementById('trans-amount').value = '';
+        document.getElementById('trans-note').value = '';
         updateUI();
         syncToFirebase();
+    }
+
+    function deleteExpense(id) {
+        if(!state.expenses) return;
+        let index = state.expenses.findIndex(e => e.id === id);
+        if (index !== -1) {
+            let exp = state.expenses[index];
+            if (confirm(`Xác nhận xóa phiếu chi "${exp.note || exp.category}" (${format(exp.amount)})? Số tiền sẽ được hoàn lại vào Ví Chi Tiêu.`)) {
+                state.funds.spending += exp.amount;
+                state.expenses.splice(index, 1);
+                updateUI();
+                syncToFirebase();
+            }
+        }
     }
 
     function executeBuy() {
@@ -453,7 +506,7 @@
         if(!asset) return alert("Vui lòng chọn loại tài sản!");
         let price = parseFloat(document.getElementById('buy-price').value);
         let qty = parseFloat(document.getElementById('buy-qty').value);
-        
+
         let total = price * qty;
         if(!price || !qty) return alert("Vui lòng nhập đầy đủ giá và số lượng!");
         if(state.funds.investCash < total) return alert("Cash chưa phân bổ không đủ!");
@@ -462,8 +515,8 @@
         state.portfolio[asset].qty += qty;
         state.portfolio[asset].totalCost += total;
         state.portfolio[asset].currentPrice = price;
-        
-        document.getElementById('buy-price').value = ''; 
+
+        document.getElementById('buy-price').value = '';
         document.getElementById('buy-qty').value = '';
         updateUI();
         syncToFirebase();
@@ -505,7 +558,7 @@
     function confirmSell() {
         let price = parseFloat(document.getElementById('modal-sell-price').value);
         let qty = parseFloat(document.getElementById('modal-sell-qty').value);
-        
+
         if(!price || !qty) return alert("Vui lòng nhập giá và số lượng bán!");
         let pData = state.portfolio[currentSellAsset];
         if(qty > pData.qty) return alert("Không đủ số lượng để bán!");
@@ -528,19 +581,19 @@
 
     function changeMarketPrice(asset, inputEl) {
         let val = parseFloat(inputEl.value);
-        if(val >= 0) { 
-            state.portfolio[asset].currentPrice = val; 
-            updateUI(); 
+        if(val >= 0) {
+            state.portfolio[asset].currentPrice = val;
+            updateUI();
             syncToFirebase();
         }
     }
 
     function format(num) { return (num || 0).toLocaleString('vi-VN') + ' đ'; }
 
-    // HÀM VẼ BIỂU ĐỒ MỚI 
+    // HÀM VẼ BIỂU ĐỒ MỚI
     function renderCharts(baseAssets, realAssets, finalPnl) {
         let today = new Date().toISOString().split('T')[0];
-        
+
         // Ghi lại Snapshot của ngày hôm nay vào lịch sử (sẽ ghi đè nếu thay đổi nhiều lần trong ngày để ra mốc cuối)
         state.history[today] = { totalReal: realAssets, pnl: finalPnl };
 
@@ -551,7 +604,7 @@
 
         const ctxHistory = document.getElementById('historyChart').getContext('2d');
         if (historyChartInstance) historyChartInstance.destroy();
-        
+
         historyChartInstance = new Chart(ctxHistory, {
             type: 'line',
             data: {
@@ -607,7 +660,7 @@
 
         const ctxAssets = document.getElementById('assetsChart').getContext('2d');
         if (assetsChartInstance) assetsChartInstance.destroy();
-        
+
         assetsChartInstance = new Chart(ctxAssets, {
             type: 'bar',
             data: {
@@ -642,7 +695,7 @@
         document.getElementById('ui-emergency').innerText = "+" + format(state.funds.emergency);
         document.getElementById('ui-education').innerText = "+" + format(state.funds.education);
         document.getElementById('ui-invest-cash').innerText = format(state.funds.investCash);
-        
+
         let buySelect = document.getElementById('buy-asset');
         let currentSelected = buySelect.value;
         buySelect.innerHTML = '';
@@ -687,7 +740,7 @@
                 let cVal = d.qty * d.currentPrice;
                 let pnl = cVal - d.totalCost;
                 let pctInPort = totalVal > 0 ? ((cVal / totalVal) * 100).toFixed(1) : 0;
-                
+
                 // Tính phần trăm Lãi/Lỗ của riêng tài sản này
                 let pnlPct = d.totalCost > 0 ? ((pnl / d.totalCost) * 100).toFixed(2) : 0;
                 let pnlText = `${pnl>=0?'+':''}${format(pnl)} (${pnl>=0?'+':''}${pnlPct}%)`;
@@ -706,15 +759,15 @@
                 `;
             }
         }
-        
+
         let finalPnl = totalVal - totalCost;
         let baseAssets = state.funds.investCash + totalCost;
         let realAssets = state.funds.investCash + totalVal;
 
-        // Cập nhật các ô Thống kê mới 
+        // Cập nhật các ô Thống kê mới
         document.getElementById('ui-invest-cost').innerText = format(totalCost);
         document.getElementById('ui-total-base').innerText = format(baseAssets);
-        
+
         let pnlEl = document.getElementById('ui-invest-pnl');
         pnlEl.innerText = (finalPnl >= 0 ? '+' : '') + format(finalPnl);
         pnlEl.className = 'amount ' + (finalPnl >= 0 ? 'text-green' : 'text-red');
@@ -725,6 +778,28 @@
 
         // Render Biểu đồ thống kê tự động
         renderCharts(baseAssets, realAssets, finalPnl);
+
+        // Render Bảng Thông Tin Phiếu Chi
+        let expBody = document.getElementById('expense-list-body');
+        if (expBody) {
+            expBody.innerHTML = '';
+            if (!state.expenses || state.expenses.length === 0) {
+                expBody.innerHTML = '<tr><td colspan="6" style="text-align:center; color: var(--text-muted);">Chưa có phiếu chi nào được ghi nhận.</td></tr>';
+            } else {
+                state.expenses.forEach(exp => {
+                    expBody.innerHTML += `
+                        <tr>
+                            <td>${exp.date || '-'}</td>
+                            <td><span class="badge-pct" style="background: rgba(239, 68, 68, 0.15); color: var(--red);">${exp.category || '-'}</span></td>
+                            <td><b>${exp.note || '-'}</b></td>
+                            <td>${exp.method || '-'}</td>
+                            <td class="text-red"><b>-${format(exp.amount)}</b></td>
+                            <td><button class="btn-sm btn-danger" onclick="deleteExpense(${exp.id})"><i class="fa-solid fa-trash"></i> Xóa</button></td>
+                        </tr>
+                    `;
+                });
+            }
+        }
     }
 
     function saveSettings() {
